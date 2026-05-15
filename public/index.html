@@ -592,6 +592,15 @@
       cvBase64 = '';
 
       try {
+        // Paso 1: leer como base64 ANTES de que PDF.js detache el ArrayBuffer
+        cvBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        // Paso 2: extraer texto con PDF.js (usa un ArrayBuffer fresco)
         const arrayBuffer = await file.arrayBuffer();
         const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
         pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -605,15 +614,6 @@
           pages.push(content.items.map(item => item.str).join(' '));
         }
         cvTexto = pages.join('\n\n');
-
-        // Capturar el PDF como base64 para guardarlo en Drive
-        const pdfBytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        const chunkSize = 8192;
-        for (let i = 0; i < pdfBytes.length; i += chunkSize) {
-          binary += String.fromCharCode.apply(null, pdfBytes.subarray(i, i + chunkSize));
-        }
-        cvBase64 = btoa(binary);
 
         if (!cvTexto.trim()) {
           showError('No se pudo extraer texto del PDF. Asegúrate de que sea un PDF con texto, no escaneado.');
