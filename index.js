@@ -238,13 +238,14 @@ async function logToSheet(env, body, result) {
   }
 }
 
-/* ── Google Drive: subir hoja de vida ───────────────────────────────────── */
+/* ── Google Drive: subir hoja de vida (dos pasos: crear + subir contenido) ─ */
 async function uploadCvToDrive(env, body) {
   if (!body.cvTexto?.trim() || !env.GOOGLE_DRIVE_FOLDER_ID) return;
   try {
     const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
     const token = await getGoogleAccessToken(sa);
     const folderId = env.GOOGLE_DRIVE_FOLDER_ID;
+    const auth = { Authorization: `Bearer ${token}` };
 
     const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.txt`;
     const content = [
@@ -258,34 +259,32 @@ async function uploadCvToDrive(env, body) {
       body.cvTexto,
     ].join("\n\n");
 
-    // Usar TextEncoder para construir el multipart como bytes (evita problemas de encoding)
-    const enc = new TextEncoder();
-    const boundary = "mpa_cv_bound";
-    const metaJson = JSON.stringify({ name: fileName, parents: [folderId] });
+    // Paso 1: crear el archivo (solo metadatos, sin contenido)
+    const metaRes = await fetch("https://www.googleapis.com/drive/v3/files", {
+      method: "POST",
+      headers: { ...auth, "Content-Type": "application/json" },
+      body: JSON.stringify({ name: fileName, parents: [folderId], mimeType: "text/plain" }),
+    });
 
-    const part1 = enc.encode(
-      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metaJson}\r\n`
-    );
-    const part2 = enc.encode(
-      `--${boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${content}\r\n--${boundary}--`
-    );
-    const body_ = new Uint8Array(part1.length + part2.length);
-    body_.set(part1, 0);
-    body_.set(part2, part1.length);
+    if (!metaRes.ok) {
+      console.error("Drive create error:", metaRes.status, await metaRes.text());
+      return;
+    }
 
-    const driveRes = await fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    const { id: fileId } = await metaRes.json();
+
+    // Paso 2: subir el contenido de texto al archivo creado
+    const uploadRes = await fetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
       {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": `multipart/related; boundary=${boundary}`,
-        },
-        body: body_,
+        method: "PATCH",
+        headers: { ...auth, "Content-Type": "text/plain; charset=utf-8" },
+        body: content,
       }
     );
-    if (!driveRes.ok) {
-      console.error("Drive upload error:", driveRes.status, await driveRes.text());
+
+    if (!uploadRes.ok) {
+      console.error("Drive upload error:", uploadRes.status, await uploadRes.text());
     }
   } catch (e) {
     console.error("Error uploading CV to Drive:", e.message);
