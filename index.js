@@ -187,9 +187,9 @@ async function logToSheet(env, body, result) {
     const token = await getGoogleAccessToken(sa);
 
     const sheetId = env.GOOGLE_SHEET_ID;
-    // Usa el nombre exacto de la pestaña. Si tu hoja se llama distinto,
-    // cambia 'Hoja 1' por el nombre correcto (o deja vacío para la primera hoja).
-    const range = encodeURIComponent("Hoja 1!A:M");
+    // Solo se codifica el nombre de la pestaña (el espacio), no el rango A1 completo.
+    const sheetName = encodeURIComponent("Hoja 1"); // → "Hoja%201"
+    const range = `${sheetName}!A:M`;
     const now = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
 
     const row = [
