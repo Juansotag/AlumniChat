@@ -31,7 +31,7 @@
 
     /* Elementos específicos del Match que no están en styles.css */
     .match-hero {
-      background: linear-gradient(135deg, var(--c-blue-dark) 0%, var(--c-blue-light) 100%);
+      background: var(--c-blue-dark);
       color: #fff;
       padding: 5rem 2rem;
       text-align: center;
@@ -46,12 +46,12 @@
 
     .match-hero h1 em {
       font-style: italic;
-      color: var(--c-yellow);
+      color: rgba(255,255,255,0.80);
     }
 
     .match-hero p {
       font-size: 1.1rem;
-      opacity: 0.88;
+      opacity: 0.85;
       max-width: 680px;
       margin: 0 auto;
     }
@@ -105,8 +105,8 @@
     .field select:focus,
     .field textarea:focus {
       outline: none;
-      border-color: var(--c-blue-light);
-      box-shadow: 0 0 0 3px rgba(0, 56, 125, 0.1);
+      border-color: var(--c-blue-dark);
+      box-shadow: 0 0 0 3px rgba(0, 19, 91, 0.10);
     }
 
     .field textarea {
@@ -128,7 +128,8 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
       font-weight: 700;
-      color: var(--c-blue-light);
+      color: var(--c-blue-dark);
+      opacity: 0.6;
       margin-bottom: 0.5rem;
     }
 
@@ -169,6 +170,51 @@
     @media (max-width: 600px) {
       .form-two-col {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Print / PDF ──────────────────────────────────────────── */
+    @page {
+      size: A4;
+      margin: 1.5cm 2cm;
+    }
+
+    @media print {
+      /* Preservar fondos de color */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Ocultar elementos no necesarios en el PDF */
+      #navbar,
+      form,
+      #error-msg,
+      #btn-submit,
+      .text-center,
+      .match-hero p {
+        display: none !important;
+      }
+
+      /* Hero compacto en impresión */
+      .match-hero {
+        padding: 2.5rem 2rem;
+        background: var(--c-blue-dark) !important;
+      }
+
+      /* Sin sombras ni animaciones */
+      .module-card {
+        box-shadow: none !important;
+        border: 1px solid var(--c-blue-dark) !important;
+      }
+
+      body {
+        background: #fff !important;
+      }
+
+      /* Evitar cortes en bloques de texto */
+      .result-text, .ficha-interna, .result-section-title {
+        page-break-inside: avoid;
       }
     }
   </style>
@@ -257,7 +303,7 @@
         </div>
 
         <div id="error-msg"
-          style="display:none; background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:0.75rem 1rem; color:#991B1B; font-size:var(--fs-md); margin-bottom:1rem;">
+          style="display:none; background:rgba(0,19,91,0.07); border:1px solid var(--c-blue-dark); border-radius:8px; padding:0.75rem 1rem; color:var(--c-blue-dark); font-size:var(--fs-md); margin-bottom:1rem;">
         </div>
 
         <div class="text-center">
@@ -275,7 +321,7 @@
       <div class="module-card" style="padding: 2.5rem; border-top: 5px solid var(--c-blue-dark);">
 
         <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
-          <h2 style="margin:0;">Tu <em style="color:var(--c-blue-light);">match</em> con el MPA</h2>
+          <h2 style="margin:0;">Tu <em style="color:var(--c-blue-dark); opacity:0.65;">match</em> con el MPA</h2>
           <div id="r-badges" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
         </div>
 
@@ -384,11 +430,10 @@
 
       const badges = document.getElementById('r-badges');
       badges.innerHTML = '';
-      const badgeColors = { 'Líder': '#4C51BF', 'Estratega': '#2F855A', 'Gerente': '#C05621' };
       (res.perfil_dominante || []).forEach(p => {
         const b = document.createElement('span');
         b.className = 'chip';
-        b.style.background = badgeColors[p] || 'var(--c-blue-dark)';
+        b.style.background = 'var(--c-blue-dark)';
         b.style.color = '#fff';
         b.style.borderColor = 'transparent';
         b.textContent = p;
