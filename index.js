@@ -120,7 +120,8 @@ function corsHeaders(origin) {
     "https://mpaescueladegobierno.com.co",
     "https://www.mpaescueladegobierno.com.co",
     "https://govlab.up.railway.app",
-    "http://localhost:8000"
+    "http://localhost:8000",
+    "https://mpachat-unisabana.up.railway.app"
   ];
   const allowedOrigin = allowed.includes(origin) ? origin : allowed[0];
   return {
