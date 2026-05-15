@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoja de Vida — Laura Camila Mora Ospina</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 10.5pt;
+      color: #1a1a2e;
+      background: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2.5rem 3rem;
+      line-height: 1.6;
+    }
+
+    /* ── Cabecera ── */
+    header {
+      border-bottom: 3px solid #00135b;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26pt;
+      font-weight: 700;
+      color: #00135b;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .tagline {
+      font-size: 10.5pt;
+      color: #555;
+      margin-top: 0.25rem;
+      font-weight: 400;
+    }
+
+    .contact-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.6rem;
+      font-size: 9.5pt;
+      color: #444;
+      flex-wrap: wrap;
+    }
+
+    .contact-row span::before { margin-right: 0.3rem; }
+
+    /* ── Secciones ── */
+    section { margin-bottom: 1.4rem; }
+
+    h2 {
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #00135b;
+      border-bottom: 1px solid #c8d0e8;
+      padding-bottom: 0.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Experiencia ── */
+    .job { margin-bottom: 1rem; }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .job-title {
+      font-weight: 700;
+      font-size: 10.5pt;
+      color: #1a1a2e;
+    }
+
+    .job-dates {
+      font-size: 9pt;
+      color: #666;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .job-org {
+      font-size: 9.5pt;
+      color: #00135b;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+    }
+
+    ul {
+      padding-left: 1.1rem;
+      margin-top: 0.25rem;
+    }
+
+    ul li {
+      font-size: 9.5pt;
+      color: #333;
+      margin-bottom: 0.2rem;
+    }
+
+    /* ── Educación ── */
+    .edu-item { margin-bottom: 0.7rem; }
+
+    .edu-degree {
+      font-weight: 600;
+      font-size: 10pt;
+    }
+
+    .edu-inst {
+      font-size: 9.5pt;
+      color: #00135b;
+    }
+
+    .edu-dates {
+      font-size: 9pt;
+      color: #666;
+    }
+
+    /* ── Dos columnas ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .skill-group h3 {
+      font-size: 9pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #444;
+      margin-bottom: 0.3rem;
+    }
+
+    .skill-group p {
+      font-size: 9.5pt;
+      color: #333;
+    }
+
+    /* ── Logros destacados ── */
+    .highlight-box {
+      background: #f0f3fb;
+      border-left: 3px solid #00135b;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 9.5pt;
+      color: #222;
+      line-height: 1.55;
+    }
+
+    @page { size: A4; margin: 1.5cm 2cm; }
+    @media print {
+      body { padding: 0; max-width: 100%; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="name">Laura Camila Mora Ospina</div>
+    <div class="tagline">Coordinadora de Proyectos Sociales · Especialista en Gestión Territorial y Política Pública</div>
+    <div class="contact-row">
+      <span>📍 Bogotá D.C., Colombia</span>
+      <span>📞 +57 315 482 9034</span>
+      <span>✉️ lcmora@correo.co</span>
+      <span>🔗 linkedin.com/in/lcmora</span>
+    </div>
+  </header>
+
+  <!-- Perfil profesional -->
+  <section>
+    <h2>Perfil Profesional</h2>
+    <p>
+      Profesional en Ciencia Política con especialización en Gestión Pública Territorial, con más de 8 años de
+      experiencia en diseño, coordinación y evaluación de proyectos sociales en el sector público. Amplia trayectoria
+      articulando comunidades, instituciones y cooperación internacional para la implementación de programas de
+      inclusión productiva y desarrollo local en Cundinamarca. Liderazgo comprobado en la conducción de equipos
+      multidisciplinarios bajo entornos de alta incertidumbre y recursos limitados.
+    </p>
+  </section>
+
+  <!-- Logro destacado -->
+  <section>
+    <h2>Logro Destacado</h2>
+    <div class="highlight-box">
+      🏆 Formulé y coordiné el programa <strong>"Territorios Productivos"</strong> en la Gobernación de Cundinamarca
+      (2021–2023), beneficiando a <strong>800 familias</strong> en situación de vulnerabilidad en 12 municipios, con
+      una inversión articulada de $4.200 millones COP entre recursos departamentales y cooperación internacional
+      (PNUD Colombia). El programa fue reconocido como buena práctica por el DNP en 2023.
+    </div>
+  </section>
+
+  <!-- Experiencia -->
+  <section>
+    <h2>Experiencia Profesional</h2>
+
+    <div class="job">
+      <div class="job-header">
+        <div class="job-title">Coordinadora de Proyectos Sociales</div>
+        <div class="job-dates">Mar 2019 – Presente</div>
+      </div>
+      <div class="job-org">Gobernación de Cundinamarca — Secretaría de Desarrollo Social, Bogotá</div>
+      <ul>
+        <li>Lideré equipos de hasta 15 profesionales en el diseño e implementación de proyectos sociales en 12 municipios de Cundinamarca.</li>
+        <li>Formulé y ejecuté el programa "Territorios Productivos", con inversión articulada de $4.200 MM COP y cobertura de 800 familias.</li>
+        <li>Articulé con el PNUD Colombia, el DNP y 12 alcaldías para la ejecución coordinada de recursos y seguimiento de indicadores.</li>
+        <li>Diseñé metodología participativa de diagnóstico territorial adaptada a contextos rurales con alta conflictividad.</li>
+        <li>Presenté resultados e informes de rendición de cuentas ante la Asamblea de Cundinamarca y organismos de control.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <div class="job-title">Profesional de Seguimiento y Evaluación</div>
+        <div class="job-dates">Ene 2017 – Feb 2019</div>
+      </div>
+      <div class="job-org">Alcaldía de Fusagasugá — Oficina Asesora de Planeación, Cundinamarca</div>
+      <ul>
+        <li>Diseñé el sistema de seguimiento al Plan de Desarrollo Municipal 2016–2019 con 47 indicadores de resultado.</li>
+        <li>Coordiné la construcción participativa del diagnóstico para el Plan de Ordenamiento Territorial.</li>
+        <li>Elaboré informes técnicos para el Ministerio del Interior y la Contraloría General de la República.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <div class="job-title">Consultora en Políticas Públicas</div>
+        <div class="job-dates">Jun 2015 – Dic 2016</div>
+      </div>
+      <div class="job-org">Fundación Buen Vivir — ONG de Desarrollo Local, Bogotá</div>
+      <ul>
+        <li>Apoyé la formulación de proyectos de cooperación internacional para convocatorias de la Unión Europea y USAID.</li>
+        <li>Diseñé talleres de fortalecimiento institucional con juntas de acción comunal en Soacha y Mosquera.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Educación -->
+  <section>
+    <h2>Educación</h2>
+
+    <div class="edu-item">
+      <div class="edu-degree">Especialización en Gestión Pública Territorial</div>
+      <div class="edu-inst">Universidad de los Andes · Bogotá</div>
+      <div class="edu-dates">2018 — Grado con distinción Meritoria</div>
+    </div>
+
+    <div class="edu-item">
+      <div class="edu-degree">Pregrado en Ciencia Política</div>
+      <div class="edu-inst">Universidad Nacional de Colombia · Bogotá</div>
+      <div class="edu-dates">2015 — Tesis laureada: "Gobernanza local y participación comunitaria en Cundinamarca"</div>
+    </div>
+  </section>
+
+  <!-- Habilidades y otros -->
+  <section>
+    <h2>Competencias y Otros</h2>
+    <div class="two-col">
+      <div class="skill-group">
+        <h3>Competencias técnicas</h3>
+        <p>Formulación y evaluación de proyectos (MGA) · Metodología de marco lógico · Análisis de política pública ·
+        Planeación estratégica · Sistemas de seguimiento y evaluación (M&amp;E) · SPSS básico</p>
+      </div>
+      <div class="skill-group">
+        <h3>Temas de interés</h3>
+        <p>Innovación pública · Gestión territorial · Política social · Gobernanza local ·
+        Inclusión productiva · Cooperación internacional al desarrollo</p>
+      </div>
+      <div class="skill-group">
+        <h3>Idiomas</h3>
+        <p>Español (nativo) · Inglés (B2 — IELTS 6.5) · Portugués (básico)</p>
+      </div>
+      <div class="skill-group">
+        <h3>Cursos y certificaciones</h3>
+        <p>Evaluación de Impacto — J-PAL (MIT OpenCourseWare, 2022) ·
+        Gerencia de Proyectos — SENA (2020) ·
+        Comunicación Pública Efectiva — ESAP (2019)</p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
