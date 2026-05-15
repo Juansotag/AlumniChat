@@ -592,6 +592,8 @@
       cvBase64 = '';
 
       try {
+        console.log('[CV] Iniciando lectura del archivo:', file.name, `(${(file.size/1024).toFixed(1)} KB)`);
+
         // Paso 1: leer como base64 ANTES de que PDF.js detache el ArrayBuffer
         cvBase64 = await new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -599,6 +601,7 @@
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
+        console.log('[CV] Base64 capturado, longitud:', cvBase64.length);
 
         // Paso 2: extraer texto con PDF.js (usa un ArrayBuffer fresco)
         const arrayBuffer = await file.arrayBuffer();
@@ -607,6 +610,8 @@
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
 
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        console.log('[CV] PDF cargado, páginas:', pdf.numPages);
+
         const pages = [];
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
@@ -614,15 +619,17 @@
           pages.push(content.items.map(item => item.str).join(' '));
         }
         cvTexto = pages.join('\n\n');
+        console.log('[CV] Texto extraído, caracteres:', cvTexto.length, '| Primeros 100:', cvTexto.substring(0, 100));
 
         if (!cvTexto.trim()) {
-          showError('No se pudo extraer texto del PDF. Asegúrate de que sea un PDF con texto, no escaneado.');
-          return;
+          console.warn('[CV] Texto vacío — el PDF puede ser imagen escaneada. Se guardará el PDF igual.');
+          // NO hacemos return: el PDF igual se guarda en Drive vía cvBase64
         }
+
         fileNameDisplay.textContent = '✓ ' + file.name + ' (' + pdf.numPages + ' pág.)';
         fileNameDisplay.style.display = 'block';
       } catch (err) {
-        showError('Error al leer el PDF: ' + err.message);
+        cvBase64 = ''; // limpiar si falló
         cvTexto = '';
       } finally {
         fileProcessing.style.display = 'none';
@@ -665,6 +672,13 @@
         cvTexto: cvTexto || undefined,
         cvBase64: cvBase64 || undefined,
       };
+
+      console.log('[SUBMIT] Payload:', {
+        cargo: payload.cargo,
+        cvTextoLen: (payload.cvTexto || '').length,
+        cvBase64Len: (payload.cvBase64 || '').length,
+        tienePDF: !!payload.cvBase64,
+      });
 
       try {
         const res = await fetch('https://mpa-match.juandiegosotagui.workers.dev/', {

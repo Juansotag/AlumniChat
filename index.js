@@ -240,10 +240,15 @@ async function logToSheet(env, body, result) {
 
 /* ── Google Drive: subir PDF original (base64 → binario → Drive) ─────────── */
 async function uploadCvToDrive(env, body) {
-  if (!body.cvBase64 || !env.GOOGLE_DRIVE_FOLDER_ID) return;
+  console.log("[Drive] Iniciando. cvBase64 presente:", !!body.cvBase64, "| folderId presente:", !!env.GOOGLE_DRIVE_FOLDER_ID);
+  if (!body.cvBase64 || !env.GOOGLE_DRIVE_FOLDER_ID) {
+    console.warn("[Drive] Saliendo temprano: falta cvBase64 o GOOGLE_DRIVE_FOLDER_ID");
+    return;
+  }
   try {
     const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
     const token = await getGoogleAccessToken(sa);
+    console.log("[Drive] Token obtenido:", token ? "OK" : "FALLO");
     const folderId = env.GOOGLE_DRIVE_FOLDER_ID;
 
     // Decodificar base64 → Uint8Array (PDF binario real)
@@ -252,6 +257,7 @@ async function uploadCvToDrive(env, body) {
     for (let i = 0; i < binaryStr.length; i++) {
       pdfBytes[i] = binaryStr.charCodeAt(i);
     }
+    console.log("[Drive] PDF decodificado, bytes:", pdfBytes.length);
 
     const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.pdf`;
     const metaJson = JSON.stringify({ name: fileName, parents: [folderId], mimeType: "application/pdf" });
@@ -268,6 +274,7 @@ async function uploadCvToDrive(env, body) {
     combined.set(head, 0);
     combined.set(pdfBytes, head.length);
     combined.set(tail, head.length + pdfBytes.length);
+    console.log("[Drive] Multipart construido, total bytes:", combined.length);
 
     const driveRes = await fetch(
       "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
@@ -281,11 +288,14 @@ async function uploadCvToDrive(env, body) {
       }
     );
 
+    const driveBody = await driveRes.text();
     if (!driveRes.ok) {
-      console.error("Drive upload error:", driveRes.status, await driveRes.text());
+      console.error("[Drive] Error HTTP:", driveRes.status, driveBody);
+    } else {
+      console.log("[Drive] Subida exitosa:", driveBody);
     }
   } catch (e) {
-    console.error("Error uploading CV to Drive:", e.message);
+    console.error("[Drive] Excepción:", e.message);
   }
 }
 
