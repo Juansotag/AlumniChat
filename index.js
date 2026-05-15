@@ -181,17 +181,35 @@ function buildUserMessage(body) {
 }
 
 /* ── Google Sheets: registrar metadatos ─────────────────────────────────── */
+const SHEET_HEADERS = [
+  "Fecha", "Cargo", "Sector", "Anos Exp.", "Edad",
+  "Formacion", "Institucion", "Intereses",
+  "Experiencia (resumen)", "Motivacion (resumen)",
+  "Perfil Dominante", "Frase Potente", "CV Adjunto"
+];
+
 async function logToSheet(env, body, result) {
   try {
     const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
     const token = await getGoogleAccessToken(sa);
-
     const sheetId = env.GOOGLE_SHEET_ID;
-    // Solo se codifica el nombre de la pestaña (el espacio), no el rango A1 completo.
-    const sheetName = encodeURIComponent("Hoja 1"); // → "Hoja%201"
-    const range = `${sheetName}!A:M`;
-    const now = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+    const sheetName = encodeURIComponent("Hoja 1");
+    const auth = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
+    // Verificar si A1 ya tiene encabezados; si no, escribirlos
+    const checkRes = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1`,
+      { headers: auth }
+    );
+    const checkData = await checkRes.json();
+    if (!checkData.values || checkData.values.length === 0) {
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1?valueInputOption=USER_ENTERED`,
+        { method: "PUT", headers: auth, body: JSON.stringify({ values: [SHEET_HEADERS] }) }
+      );
+    }
+
+    const now = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
     const row = [
       now,
       body.cargo || "",
@@ -205,33 +223,24 @@ async function logToSheet(env, body, result) {
       (body.motivacion || "").substring(0, 300),
       (result.perfil_dominante || []).join(", "),
       result.frase_potente || "",
-      body.cvTexto ? "Sí" : "No",
+      body.cvTexto ? "Si" : "No",
     ];
 
-    const sheetsRes = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ values: [row] }),
-      }
+    const appendRes = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A:M:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+      { method: "POST", headers: auth, body: JSON.stringify({ values: [row] }) }
     );
-
-    if (!sheetsRes.ok) {
-      const errBody = await sheetsRes.text();
-      console.error("Sheets API error:", sheetsRes.status, errBody);
+    if (!appendRes.ok) {
+      console.error("Sheets append error:", appendRes.status, await appendRes.text());
     }
   } catch (e) {
     console.error("Error logging to sheet:", e.message);
   }
 }
 
-/* ── Google Drive: subir hoja de vida en texto ───────────────────────────── */
+/* ── Google Drive: subir hoja de vida ───────────────────────────────────── */
 async function uploadCvToDrive(env, body) {
-  if (!body.cvTexto?.trim()) return null;
+  if (!body.cvTexto?.trim() || !env.GOOGLE_DRIVE_FOLDER_ID) return;
   try {
     const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
     const token = await getGoogleAccessToken(sa);
@@ -242,35 +251,42 @@ async function uploadCvToDrive(env, body) {
       `Cargo: ${body.cargo || ""}`,
       `Sector: ${body.sector || ""}`,
       `Edad: ${body.edad || ""}`,
-      `Formación: ${body.formacion || ""} — ${body.institucion || ""}`,
+      `Formacion: ${body.formacion || ""} - ${body.institucion || ""}`,
       `Experiencia: ${body.experiencia || ""}`,
-      `Motivación: ${body.motivacion || ""}`,
+      `Motivacion: ${body.motivacion || ""}`,
       `--- HOJA DE VIDA ---`,
       body.cvTexto,
     ].join("\n\n");
 
-    const metadata = JSON.stringify({ name: fileName, parents: [folderId] });
-    const boundary = "boundary_mpa_cv";
-    const multipart = [
-      `--${boundary}`,
-      "Content-Type: application/json; charset=UTF-8",
-      "",
-      metadata,
-      `--${boundary}`,
-      "Content-Type: text/plain; charset=UTF-8",
-      "",
-      content,
-      `--${boundary}--`,
-    ].join("\r\n");
+    // Usar TextEncoder para construir el multipart como bytes (evita problemas de encoding)
+    const enc = new TextEncoder();
+    const boundary = "mpa_cv_bound";
+    const metaJson = JSON.stringify({ name: fileName, parents: [folderId] });
 
-    await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": `multipart/related; boundary=${boundary}`,
-      },
-      body: multipart,
-    });
+    const part1 = enc.encode(
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metaJson}\r\n`
+    );
+    const part2 = enc.encode(
+      `--${boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n${content}\r\n--${boundary}--`
+    );
+    const body_ = new Uint8Array(part1.length + part2.length);
+    body_.set(part1, 0);
+    body_.set(part2, part1.length);
+
+    const driveRes = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": `multipart/related; boundary=${boundary}`,
+        },
+        body: body_,
+      }
+    );
+    if (!driveRes.ok) {
+      console.error("Drive upload error:", driveRes.status, await driveRes.text());
+    }
   } catch (e) {
     console.error("Error uploading CV to Drive:", e.message);
   }
