@@ -273,13 +273,19 @@ async function uploadCvToDrive(env, body) {
 
     const { id: fileId } = await metaRes.json();
 
-    // Paso 2: subir el contenido de texto al archivo creado
+    // Paso 2: subir el contenido — TextEncoder garantiza que los bytes
+    // se envíen correctamente desde Cloudflare Workers en peticiones PATCH
+    const contentBytes = new TextEncoder().encode(content);
     const uploadRes = await fetch(
       `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
       {
         method: "PATCH",
-        headers: { ...auth, "Content-Type": "text/plain; charset=utf-8" },
-        body: content,
+        headers: {
+          ...auth,
+          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Length": String(contentBytes.length),
+        },
+        body: contentBytes,
       }
     );
 
