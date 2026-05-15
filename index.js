@@ -223,7 +223,7 @@ async function logToSheet(env, body, result) {
       (body.motivacion || "").substring(0, 300),
       (result.perfil_dominante || []).join(", "),
       result.frase_potente || "",
-      body.cvTexto ? "Si" : "No",
+      body.cvBase64 ? "Si" : "No",
     ];
 
     const appendRes = await fetch(
@@ -238,59 +238,51 @@ async function logToSheet(env, body, result) {
   }
 }
 
-/* ── Google Drive: subir hoja de vida (dos pasos: crear + subir contenido) ─ */
+/* ── Google Drive: subir PDF original (base64 → binario → Drive) ─────────── */
 async function uploadCvToDrive(env, body) {
-  if (!body.cvTexto?.trim() || !env.GOOGLE_DRIVE_FOLDER_ID) return;
+  if (!body.cvBase64 || !env.GOOGLE_DRIVE_FOLDER_ID) return;
   try {
     const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
     const token = await getGoogleAccessToken(sa);
     const folderId = env.GOOGLE_DRIVE_FOLDER_ID;
-    const auth = { Authorization: `Bearer ${token}` };
 
-    const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.txt`;
-    const content = [
-      `Cargo: ${body.cargo || ""}`,
-      `Sector: ${body.sector || ""}`,
-      `Edad: ${body.edad || ""}`,
-      `Formacion: ${body.formacion || ""} - ${body.institucion || ""}`,
-      `Experiencia: ${body.experiencia || ""}`,
-      `Motivacion: ${body.motivacion || ""}`,
-      `--- HOJA DE VIDA ---`,
-      body.cvTexto,
-    ].join("\n\n");
-
-    // Paso 1: crear el archivo (solo metadatos, sin contenido)
-    const metaRes = await fetch("https://www.googleapis.com/drive/v3/files", {
-      method: "POST",
-      headers: { ...auth, "Content-Type": "application/json" },
-      body: JSON.stringify({ name: fileName, parents: [folderId], mimeType: "text/plain" }),
-    });
-
-    if (!metaRes.ok) {
-      console.error("Drive create error:", metaRes.status, await metaRes.text());
-      return;
+    // Decodificar base64 → Uint8Array (PDF binario real)
+    const binaryStr = atob(body.cvBase64);
+    const pdfBytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      pdfBytes[i] = binaryStr.charCodeAt(i);
     }
 
-    const { id: fileId } = await metaRes.json();
+    const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.pdf`;
+    const metaJson = JSON.stringify({ name: fileName, parents: [folderId], mimeType: "application/pdf" });
+    const boundary = "mpa_cv_bound";
 
-    // Paso 2: subir el contenido — TextEncoder garantiza que los bytes
-    // se envíen correctamente desde Cloudflare Workers en peticiones PATCH
-    const contentBytes = new TextEncoder().encode(content);
-    const uploadRes = await fetch(
-      `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+    // Construir multipart: metadatos JSON + PDF binario en un solo POST
+    const enc = new TextEncoder();
+    const head = enc.encode(
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metaJson}\r\n--${boundary}\r\nContent-Type: application/pdf\r\n\r\n`
+    );
+    const tail = enc.encode(`\r\n--${boundary}--`);
+
+    const combined = new Uint8Array(head.length + pdfBytes.length + tail.length);
+    combined.set(head, 0);
+    combined.set(pdfBytes, head.length);
+    combined.set(tail, head.length + pdfBytes.length);
+
+    const driveRes = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
       {
-        method: "PATCH",
+        method: "POST",
         headers: {
-          ...auth,
-          "Content-Type": "text/plain; charset=utf-8",
-          "Content-Length": String(contentBytes.length),
+          Authorization: `Bearer ${token}`,
+          "Content-Type": `multipart/related; boundary=${boundary}`,
         },
-        body: contentBytes,
+        body: combined,
       }
     );
 
-    if (!uploadRes.ok) {
-      console.error("Drive upload error:", uploadRes.status, await uploadRes.text());
+    if (!driveRes.ok) {
+      console.error("Drive upload error:", driveRes.status, await driveRes.text());
     }
   } catch (e) {
     console.error("Error uploading CV to Drive:", e.message);

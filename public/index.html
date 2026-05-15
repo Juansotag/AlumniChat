@@ -563,6 +563,7 @@
 
     /* ── Drag & drop + extracción de texto de PDF con PDF.js ────── */
     let cvTexto = "";
+    let cvBase64 = "";
     const fileInput = document.getElementById('f-cv');
     const fileArea = document.getElementById('file-upload-area');
     const fileNameDisplay = document.getElementById('file-name-display');
@@ -588,6 +589,7 @@
       fileProcessing.style.display = 'flex';
       fileNameDisplay.style.display = 'none';
       cvTexto = '';
+      cvBase64 = '';
 
       try {
         const arrayBuffer = await file.arrayBuffer();
@@ -603,6 +605,15 @@
           pages.push(content.items.map(item => item.str).join(' '));
         }
         cvTexto = pages.join('\n\n');
+
+        // Capturar el PDF como base64 para guardarlo en Drive
+        const pdfBytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < pdfBytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, pdfBytes.subarray(i, i + chunkSize));
+        }
+        cvBase64 = btoa(binary);
 
         if (!cvTexto.trim()) {
           showError('No se pudo extraer texto del PDF. Asegúrate de que sea un PDF con texto, no escaneado.');
@@ -652,6 +663,7 @@
         experiencia,
         motivacion,
         cvTexto: cvTexto || undefined,
+        cvBase64: cvBase64 || undefined,
       };
 
       try {
