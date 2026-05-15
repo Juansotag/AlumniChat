@@ -419,6 +419,9 @@ export default {
 
     // Guardar en Google Sheets y Drive — ctx.waitUntil mantiene el Worker
     // vivo hasta que terminen estas llamadas, sin bloquear la respuesta.
+    console.log("[Worker] body.cvBase64 presente:", !!body.cvBase64, "| longitud:", body.cvBase64?.length ?? 0);
+    console.log("[Worker] GOOGLE_DRIVE_FOLDER_ID presente:", !!env.GOOGLE_DRIVE_FOLDER_ID);
+    console.log("[Worker] GOOGLE_SHEET_ID presente:", !!env.GOOGLE_SHEET_ID);
     if (env.GOOGLE_SERVICE_ACCOUNT && env.GOOGLE_SHEET_ID) {
       ctx.waitUntil(
         Promise.all([
