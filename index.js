@@ -187,8 +187,10 @@ async function logToSheet(env, body, result) {
     const token = await getGoogleAccessToken(sa);
 
     const sheetId = env.GOOGLE_SHEET_ID;
-    const range = "Registros!A:M";
-    const now = new Date().toISOString();
+    // Usa el nombre exacto de la pestaña. Si tu hoja se llama distinto,
+    // cambia 'Hoja 1' por el nombre correcto (o deja vacío para la primera hoja).
+    const range = encodeURIComponent("Hoja 1!A:M");
+    const now = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
 
     const row = [
       now,
@@ -199,15 +201,15 @@ async function logToSheet(env, body, result) {
       body.formacion || "",
       body.institucion || "",
       body.intereses || "",
-      body.experiencia?.substring(0, 300) || "",
-      body.motivacion?.substring(0, 300) || "",
+      (body.experiencia || "").substring(0, 300),
+      (body.motivacion || "").substring(0, 300),
       (result.perfil_dominante || []).join(", "),
       result.frase_potente || "",
       body.cvTexto ? "Sí" : "No",
     ];
 
-    await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=RAW`,
+    const sheetsRes = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
       {
         method: "POST",
         headers: {
@@ -217,9 +219,13 @@ async function logToSheet(env, body, result) {
         body: JSON.stringify({ values: [row] }),
       }
     );
+
+    if (!sheetsRes.ok) {
+      const errBody = await sheetsRes.text();
+      console.error("Sheets API error:", sheetsRes.status, errBody);
+    }
   } catch (e) {
     console.error("Error logging to sheet:", e.message);
-    // No interrumpimos la respuesta al usuario si el log falla
   }
 }
 
@@ -312,7 +318,7 @@ async function importRsaKey(pem) {
 
 /* ── Handler principal ───────────────────────────────────────────────────── */
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
 
     if (request.method === "OPTIONS") {
@@ -388,13 +394,15 @@ export default {
       );
     }
 
-    // Guardar en Google Sheets y Drive de forma asíncrona (no bloqueante)
+    // Guardar en Google Sheets y Drive — ctx.waitUntil mantiene el Worker
+    // vivo hasta que terminen estas llamadas, sin bloquear la respuesta.
     if (env.GOOGLE_SERVICE_ACCOUNT && env.GOOGLE_SHEET_ID) {
-      const ctx = { waitUntil: (p) => p }; // fallback si no hay ctx
-      Promise.all([
-        logToSheet(env, body, parsed),
-        uploadCvToDrive(env, body),
-      ]).catch(console.error);
+      ctx.waitUntil(
+        Promise.all([
+          logToSheet(env, body, parsed),
+          uploadCvToDrive(env, body),
+        ])
+      );
     }
 
     return jsonResponse({ ok: true, result: parsed }, 200, origin);
