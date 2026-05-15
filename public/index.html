@@ -8,7 +8,7 @@
   <meta name="description"
     content="Descubre cómo la Maestría en Administración Pública potencia tu trayectoria. Análisis de perfil personalizado, asistido por IA.">
 
-  <!-- Google Fonts: Libre Franklin + Cabinet Grotesk + Playfair Display -->
+  <!-- Google Fonts: Libre Franklin + Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -46,7 +46,7 @@
 
     .match-hero h1 em {
       font-style: italic;
-      color: rgba(255,255,255,0.80);
+      color: rgba(255, 255, 255, 0.80);
     }
 
     .match-hero p {
@@ -115,6 +115,103 @@
       line-height: 1.6;
     }
 
+    /* Campo de archivo */
+    .file-upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--bg-card);
+    }
+
+    .file-upload-area:hover,
+    .file-upload-area.drag-over {
+      border-color: var(--c-blue-dark);
+      background: rgba(0, 19, 91, 0.04);
+    }
+
+    .file-upload-area input[type="file"] {
+      display: none;
+    }
+
+    .file-processing {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+    }
+
+    .file-processing .mini-spinner {
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(0, 19, 91, 0.25);
+      border-top-color: var(--c-blue-dark);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .file-upload-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      opacity: 0.4;
+    }
+
+    .file-upload-text {
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .file-upload-text strong {
+      color: var(--c-blue-dark);
+    }
+
+    #file-name-display {
+      margin-top: 0.5rem;
+      font-size: var(--fs-sm);
+      color: var(--c-blue-dark);
+      font-weight: 600;
+      display: none;
+    }
+
+    /* Aviso de tratamiento de datos */
+    .consent-box {
+      background: rgba(0, 19, 91, 0.05);
+      border: 1px solid rgba(0, 19, 91, 0.18);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .consent-box input[type="checkbox"] {
+      flex-shrink: 0;
+      margin-top: 3px;
+      width: 17px;
+      height: 17px;
+      accent-color: var(--c-blue-dark);
+      cursor: pointer;
+    }
+
+    .consent-box label {
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    .consent-box label strong {
+      color: var(--text-primary);
+    }
+
     /* Resultado */
     #results-area {
       display: none;
@@ -139,16 +236,31 @@
       line-height: var(--lh);
     }
 
-    .ficha-interna {
-      background-color: var(--c-blue-tint);
-      border-left: 4px solid var(--c-blue-dark);
+    /* Frase potente final */
+    .frase-potente-wrapper {
+      margin-top: 2.5rem;
+      padding: 2rem 2.5rem;
+      background: var(--c-blue-dark);
       border-radius: var(--radius);
-      padding: 1.5rem;
-      font-family: var(--font-main);
+      text-align: center;
+    }
+
+    .frase-potente-label {
       font-size: var(--fs-sm);
-      color: var(--text-secondary);
-      white-space: pre-line;
-      line-height: 1.7;
+      font-family: var(--font-label);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 1rem;
+    }
+
+    .frase-potente-text {
+      font-family: 'Publico Banner', 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      color: #fff;
+      line-height: 1.35;
+      font-style: italic;
     }
 
     .spinner-inline {
@@ -180,6 +292,7 @@
     }
 
     @media print {
+
       /* Preservar fondos de color */
       * {
         -webkit-print-color-adjust: exact !important;
@@ -213,7 +326,9 @@
       }
 
       /* Evitar cortes en bloques de texto */
-      .result-text, .ficha-interna, .result-section-title {
+      .result-text,
+      .frase-potente-wrapper,
+      .result-section-title {
         page-break-inside: avoid;
       }
     }
@@ -249,6 +364,8 @@
         análisis.</p>
 
       <form id="match-form">
+
+        <!-- Fila 1: Cargo + Sector -->
         <div class="form-two-col">
           <div class="field">
             <label for="f-cargo">Cargo o rol actual</label>
@@ -269,6 +386,7 @@
           </div>
         </div>
 
+        <!-- Fila 2: Años de experiencia + Rango de edad -->
         <div class="form-two-col">
           <div class="field">
             <label for="f-anos">Años de experiencia laboral</label>
@@ -281,11 +399,47 @@
             </select>
           </div>
           <div class="field">
-            <label for="f-intereses">Temas de interés <span style="font-weight:300; text-transform:none;">(opcional)</span></label>
+            <label for="f-edad">Rango de edad</label>
+            <select id="f-edad">
+              <option value="">Selecciona...</option>
+              <option>Menos de 25 años</option>
+              <option>25 a 30 años</option>
+              <option>31 a 35 años</option>
+              <option>36 a 40 años</option>
+              <option>41 a 50 años</option>
+              <option>Más de 50 años</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 3: Nivel de formación + Institución -->
+        <div class="form-two-col">
+          <div class="field">
+            <label for="f-formacion">Nivel de formación más alto alcanzado</label>
+            <select id="f-formacion">
+              <option value="">Selecciona...</option>
+              <option>Pregrado / Licenciatura</option>
+              <option>Especialización</option>
+              <option>Maestría</option>
+              <option>Doctorado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-institucion">Institución donde obtuvo ese título</label>
+            <input type="text" id="f-institucion" placeholder="Ej: Universidad Nacional de Colombia" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Fila 4: Temas de interés (full width) -->
+        <div class="form-one-col">
+          <div class="field">
+            <label for="f-intereses">Temas de interés <span
+                style="font-weight:300; text-transform:none;">(opcional)</span></label>
             <input type="text" id="f-intereses" placeholder="Ej: gestión territorial, innovación...">
           </div>
         </div>
 
+        <!-- Experiencia -->
         <div class="form-one-col">
           <div class="field">
             <label for="f-experiencia">Tu experiencia y logros más relevantes</label>
@@ -294,12 +448,45 @@
           </div>
         </div>
 
+        <!-- Motivación -->
         <div class="form-one-col">
           <div class="field">
             <label for="f-motivacion">¿Por qué te interesa el MPA? ¿Qué esperas lograr?</label>
             <textarea id="f-motivacion"
               placeholder="Ej: Quiero tomar decisiones de política pública con mayor rigor..."></textarea>
           </div>
+        </div>
+
+        <!-- Hoja de vida (PDF) -->
+        <div class="form-one-col">
+          <div class="field">
+            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional — PDF con texto)</span></label>
+            <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()">
+              <input type="file" id="f-cv" accept=".pdf,application/pdf">
+              <span class="file-upload-icon">📋</span>
+              <div class="file-upload-text">
+                <strong>Haz clic para seleccionar</strong> o arrastra tu PDF aquí<br>
+                Solo PDFs con texto (no imágenes escaneadas). El texto se extrae en tu navegador.
+              </div>
+              <div class="file-processing" id="file-processing">
+                <div class="mini-spinner"></div>
+                <span>Extrayendo texto del PDF…</span>
+              </div>
+              <div id="file-name-display"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consentimiento -->
+        <div class="consent-box">
+          <input type="checkbox" id="f-consent" required>
+          <label for="f-consent">
+            Al hacer clic en "Analizar mi perfil" acepto el
+            <strong>tratamiento de mis datos personales</strong> por parte de la Escuela de Gobierno de la
+            Universidad de La Sabana, conforme a su política de privacidad. Entiendo que la información
+            diligenciada —incluyendo mi hoja de vida si la adjunto— será almacenada con fines exclusivos de
+            orientación académica y mejora del programa MPA.
+          </label>
         </div>
 
         <div id="error-msg"
@@ -325,7 +512,8 @@
           <div id="r-badges" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2rem;">
+        <div
+          style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2rem;">
           <div>
             <p class="result-section-title">Conexión con tu trayectoria</p>
             <p class="result-text" id="r-conexion"></p>
@@ -344,8 +532,11 @@
           </div>
         </div>
 
-        <p class="result-section-title">Ficha interna · Escuela de Gobierno</p>
-        <div class="ficha-interna" id="r-ficha"></div>
+        <!-- Frase potente final -->
+        <div class="frase-potente-wrapper" id="r-frase-wrapper" style="display:none;">
+          <p class="frase-potente-label">Tu oportunidad de crecimiento</p>
+          <p class="frase-potente-text" id="r-frase"></p>
+        </div>
 
         <div class="text-center" style="margin-top:2rem;">
           <button class="btn btn-outline btn-large" onclick="window.print()">Guardar análisis (PDF)</button>
@@ -370,16 +561,78 @@
     const resultsArea = document.getElementById('results-area');
     const errorMsg = document.getElementById('error-msg');
 
+    /* ── Drag & drop + extracción de texto de PDF con PDF.js ────── */
+    let cvTexto = "";
+    const fileInput = document.getElementById('f-cv');
+    const fileArea = document.getElementById('file-upload-area');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const fileProcessing = document.getElementById('file-processing');
+
+    fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+
+    fileArea.addEventListener('dragover', (e) => { e.preventDefault(); fileArea.classList.add('drag-over'); });
+    fileArea.addEventListener('dragleave', () => fileArea.classList.remove('drag-over'));
+    fileArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileArea.classList.remove('drag-over');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    async function handleFile(file) {
+      if (!file) return;
+      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+        showError('Por favor sube un archivo PDF.');
+        return;
+      }
+
+      fileProcessing.style.display = 'flex';
+      fileNameDisplay.style.display = 'none';
+      cvTexto = '';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pages = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          pages.push(content.items.map(item => item.str).join(' '));
+        }
+        cvTexto = pages.join('\n\n');
+
+        if (!cvTexto.trim()) {
+          showError('No se pudo extraer texto del PDF. Asegúrate de que sea un PDF con texto, no escaneado.');
+          return;
+        }
+        fileNameDisplay.textContent = '✓ ' + file.name + ' (' + pdf.numPages + ' pág.)';
+        fileNameDisplay.style.display = 'block';
+      } catch (err) {
+        showError('Error al leer el PDF: ' + err.message);
+        cvTexto = '';
+      } finally {
+        fileProcessing.style.display = 'none';
+      }
+    }
+
+    /* ── Submit ─────────────────────────────────────────────────── */
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.style.display = 'none';
 
       const experiencia = document.getElementById('f-experiencia').value.trim();
       const motivacion = document.getElementById('f-motivacion').value.trim();
+      const consent = document.getElementById('f-consent').checked;
 
       if (!experiencia && !motivacion) {
-        errorMsg.textContent = 'Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.';
-        errorMsg.style.display = 'block';
+        showError('Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.');
+        return;
+      }
+      if (!consent) {
+        showError('Debes aceptar el tratamiento de datos personales para continuar.');
         return;
       }
 
@@ -392,9 +645,13 @@
         cargo: document.getElementById('f-cargo').value,
         sector: document.getElementById('f-sector').value,
         anos: document.getElementById('f-anos').value,
+        edad: document.getElementById('f-edad').value,
+        formacion: document.getElementById('f-formacion').value,
+        institucion: document.getElementById('f-institucion').value,
         intereses: document.getElementById('f-intereses').value,
         experiencia,
-        motivacion
+        motivacion,
+        cvTexto: cvTexto || undefined,
       };
 
       try {
@@ -412,8 +669,7 @@
           throw new Error(data.error || `Error ${res.status}`);
         }
       } catch (err) {
-        errorMsg.textContent = 'Ocurrió un error: ' + err.message + '. Por favor intenta de nuevo.';
-        errorMsg.style.display = 'block';
+        showError('Ocurrió un error: ' + err.message + '. Por favor intenta de nuevo.');
       } finally {
         btnSubmit.disabled = false;
         spinner.style.display = 'none';
@@ -421,12 +677,16 @@
       }
     });
 
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
     function renderResults(res) {
       document.getElementById('r-conexion').textContent = res.conexion || '';
       document.getElementById('r-competencias').textContent = res.competencias || '';
       document.getElementById('r-lineas').textContent = res.lineas || '';
       document.getElementById('r-proyeccion').textContent = res.proyeccion || '';
-      document.getElementById('r-ficha').textContent = res.ficha_interna || '';
 
       const badges = document.getElementById('r-badges');
       badges.innerHTML = '';
@@ -440,6 +700,16 @@
         badges.appendChild(b);
       });
 
+      // Frase potente
+      const fraseWrapper = document.getElementById('r-frase-wrapper');
+      const fraseEl = document.getElementById('r-frase');
+      if (res.frase_potente) {
+        fraseEl.textContent = res.frase_potente;
+        fraseWrapper.style.display = 'block';
+      } else {
+        fraseWrapper.style.display = 'none';
+      }
+
       resultsArea.style.display = 'block';
       resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -449,6 +719,9 @@
       cargo: "Coordinadora de Proyectos Sociales",
       sector: "Gobierno territorial (gobernación / municipio)",
       anos: "5 a 10 años",
+      edad: "31 a 35 años",
+      formacion: "Especialización",
+      institucion: "Universidad de los Andes",
       intereses: "innovación pública, gestión territorial, política social",
       experiencia: "He liderado equipos multidisciplinarios en el diseño e implementación de proyectos sociales en 12 municipios de Cundinamarca. Formulé un programa de inclusión productiva que benefició a 800 familias en situación de vulnerabilidad, articulando recursos de la gobernación con cooperación internacional.",
       motivacion: "Quiero tomar decisiones de política pública con mayor rigor técnico y evidencia. Me interesa aprender a diseñar programas que realmente transformen los territorios donde trabajo."
@@ -460,6 +733,9 @@
         document.getElementById("f-intereses").value = EJEMPLO.intereses;
         document.getElementById("f-experiencia").value = EJEMPLO.experiencia;
         document.getElementById("f-motivacion").value = EJEMPLO.motivacion;
+        document.getElementById("f-institucion").value = EJEMPLO.institucion;
+        document.getElementById("f-consent").checked = true;
+
         const selSector = document.getElementById("f-sector");
         for (let i = 0; i < selSector.options.length; i++) {
           if (selSector.options[i].text === EJEMPLO.sector) { selSector.selectedIndex = i; break; }
@@ -467,6 +743,14 @@
         const selAnos = document.getElementById("f-anos");
         for (let i = 0; i < selAnos.options.length; i++) {
           if (selAnos.options[i].text === EJEMPLO.anos) { selAnos.selectedIndex = i; break; }
+        }
+        const selEdad = document.getElementById("f-edad");
+        for (let i = 0; i < selEdad.options.length; i++) {
+          if (selEdad.options[i].text === EJEMPLO.edad) { selEdad.selectedIndex = i; break; }
+        }
+        const selFormacion = document.getElementById("f-formacion");
+        for (let i = 0; i < selFormacion.options.length; i++) {
+          if (selFormacion.options[i].text === EJEMPLO.formacion) { selFormacion.selectedIndex = i; break; }
         }
       }
     });

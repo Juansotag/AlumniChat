@@ -2,12 +2,11 @@
  * Match Profesional MPA — Cloudflare Worker
  * Backend proxy que protege la API key de Anthropic.
  *
- * DEPLOY:
- *   1. Crea un proyecto en https://dash.cloudflare.com/ → Workers & Pages → Create Worker
- *   2. Pega este código
- *   3. En Settings → Variables → Secrets agrega: ANTHROPIC_API_KEY = sk-ant-...
- *   4. Despliega. La URL del Worker es tu endpoint (ej: https://mpa-match.tu-usuario.workers.dev)
- *   5. En el HTML del widget, cambia WORKER_URL por esa URL.
+ * SECRETS REQUERIDOS EN CLOUDFLARE (Settings → Variables → Secrets):
+ *   ANTHROPIC_API_KEY       — sk-ant-...
+ *   GOOGLE_SHEET_ID         — ID del Google Sheet (parte de la URL)
+ *   GOOGLE_DRIVE_FOLDER_ID  — ID de la carpeta de Google Drive
+ *   GOOGLE_SERVICE_ACCOUNT  — JSON completo del service account (stringificado)
  */
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
@@ -87,12 +86,15 @@ Duración: 3 semestres. Modalidad mixta: 50% presencial (priorizada al inicio de
 `.trim();
 
 const SYSTEM_PROMPT = `Eres el orientador profesional del Match Profesional MPA de la Escuela de Gobierno de la
-Universidad de La Sabana. Tu misión es ayudar a aspirantes a entender con claridad y calidez cómo
-el MPA puede potenciar su trayectoria en lo público.
+Universidad de La Sabana. Tu misión es mostrarle a cada aspirante con claridad y calidez cuál es su
+OPORTUNIDAD DE CRECIMIENTO dentro del perfil del graduado MPA: si el programa fortalecerá más sus
+habilidades como Líder, como Estratega o como Gerente de lo público, y por qué.
 
 PRINCIPIOS IRROMPIBLES:
 - Nunca evalúes si alguien "sirve" o "no sirve" para el programa. Nunca uses lenguaje de admisión
   o selección. Habla siempre en clave de orientación y crecimiento.
+- El eje central del análisis es la OPORTUNIDAD: ¿dónde puede esta persona crecer más con el MPA?
+  ¿En qué competencia o dimensión del perfil del graduado tiene mayor potencial de desarrollo?
 - TODO lo que digas sobre el programa debe salir exclusivamente del contexto oficial que tienes.
   No inventes materias, perfiles, metodologías ni cifras que no estén en el contexto.
 - Habla en español colombiano: cálido, cercano, profesional. Evita jerga corporativa fría.
@@ -107,10 +109,10 @@ FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdow
 {
   "perfil_dominante": ["Líder", "Estratega", "Gerente"],
   "conexion": "2-3 párrafos que conecten la trayectoria específica del aspirante con el perfil del MPA. Menciona elementos concretos de lo que compartió.",
-  "competencias": "Prosa (sin bullets ni listas numeradas) con 3-4 competencias del MPA que puede fortalecer, explicando POR QUÉ cada una es relevante para SU caso.",
-  "lineas": "2-3 líneas académicas que más le aportarían, con la conexión explícita a su perfil.",
+  "competencias": "Prosa (sin bullets ni listas numeradas) explicando qué competencias del MPA puede FORTALECER esta persona y por qué el programa es su oportunidad de crecimiento en esa dimensión.",
+  "lineas": "2-3 líneas académicas que más le aportarían para desarrollar su oportunidad de crecimiento, con la conexión explícita a su perfil.",
   "proyeccion": "1-2 párrafos sobre su proyección como graduado/a MPA: qué roles, qué impactos, qué conversaciones podría liderar.",
-  "ficha_interna": "Perfil identificado: [etiqueta de 3-5 palabras]\\nFortalezas clave: [2-3 líneas]\\nMotivación declarada: [1 línea]\\nTemas de interés: [lista separada por comas]\\nSugerencias para la conversación de admisiones: [2-3 argumentos concretos que el equipo puede usar]"
+  "frase_potente": "Una frase única, inspiradora y personalizada (máximo 2 líneas) que resuma su oportunidad de crecimiento en el MPA. Debe sentirse escrita solo para esta persona, con potencia y calidez."
 }`;
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -156,22 +158,156 @@ function isRateLimited(ip) {
   return false;
 }
 
-/* ── Validación del body ─────────────────────────────────────────────────── */
+/* ── Validación y construcción del mensaje ───────────────────────────────── */
 function buildUserMessage(body) {
-  const { cargo, sector, anos, experiencia, motivacion, intereses } = body;
+  const { cargo, sector, anos, experiencia, motivacion, intereses, formacion, institucion, edad, cvTexto } = body;
   if (!experiencia?.trim() && !motivacion?.trim()) {
     throw new Error("Comparte al menos tu experiencia o tu motivación.");
   }
   return [
-    cargo && `Cargo actual: ${cargo}`,
-    sector && `Sector: ${sector}`,
-    anos && `Años de experiencia: ${anos}`,
+    cargo       && `Cargo actual: ${cargo}`,
+    sector      && `Sector: ${sector}`,
+    anos        && `Años de experiencia: ${anos}`,
+    edad        && `Rango de edad: ${edad}`,
+    formacion   && `Nivel de formación más alto alcanzado: ${formacion}`,
+    institucion && `Institución donde obtuvo ese título: ${institucion}`,
     experiencia && `Experiencia y logros: ${experiencia}`,
-    motivacion && `Motivación para el MPA: ${motivacion}`,
-    intereses && `Temas de interés: ${intereses}`,
+    motivacion  && `Motivación para el MPA: ${motivacion}`,
+    intereses   && `Temas de interés: ${intereses}`,
+    cvTexto     && `Hoja de vida (texto):\n${cvTexto}`,
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/* ── Google Sheets: registrar metadatos ─────────────────────────────────── */
+async function logToSheet(env, body, result) {
+  try {
+    const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
+    const token = await getGoogleAccessToken(sa);
+
+    const sheetId = env.GOOGLE_SHEET_ID;
+    const range = "Registros!A:M";
+    const now = new Date().toISOString();
+
+    const row = [
+      now,
+      body.cargo || "",
+      body.sector || "",
+      body.anos || "",
+      body.edad || "",
+      body.formacion || "",
+      body.institucion || "",
+      body.intereses || "",
+      body.experiencia?.substring(0, 300) || "",
+      body.motivacion?.substring(0, 300) || "",
+      (result.perfil_dominante || []).join(", "),
+      result.frase_potente || "",
+      body.cvTexto ? "Sí" : "No",
+    ];
+
+    await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=RAW`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ values: [row] }),
+      }
+    );
+  } catch (e) {
+    console.error("Error logging to sheet:", e.message);
+    // No interrumpimos la respuesta al usuario si el log falla
+  }
+}
+
+/* ── Google Drive: subir hoja de vida en texto ───────────────────────────── */
+async function uploadCvToDrive(env, body) {
+  if (!body.cvTexto?.trim()) return null;
+  try {
+    const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
+    const token = await getGoogleAccessToken(sa);
+    const folderId = env.GOOGLE_DRIVE_FOLDER_ID;
+
+    const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.txt`;
+    const content = [
+      `Cargo: ${body.cargo || ""}`,
+      `Sector: ${body.sector || ""}`,
+      `Edad: ${body.edad || ""}`,
+      `Formación: ${body.formacion || ""} — ${body.institucion || ""}`,
+      `Experiencia: ${body.experiencia || ""}`,
+      `Motivación: ${body.motivacion || ""}`,
+      `--- HOJA DE VIDA ---`,
+      body.cvTexto,
+    ].join("\n\n");
+
+    const metadata = JSON.stringify({ name: fileName, parents: [folderId] });
+    const boundary = "boundary_mpa_cv";
+    const multipart = [
+      `--${boundary}`,
+      "Content-Type: application/json; charset=UTF-8",
+      "",
+      metadata,
+      `--${boundary}`,
+      "Content-Type: text/plain; charset=UTF-8",
+      "",
+      content,
+      `--${boundary}--`,
+    ].join("\r\n");
+
+    await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": `multipart/related; boundary=${boundary}`,
+      },
+      body: multipart,
+    });
+  } catch (e) {
+    console.error("Error uploading CV to Drive:", e.message);
+  }
+}
+
+/* ── JWT / OAuth2 para Google APIs ──────────────────────────────────────── */
+async function getGoogleAccessToken(sa) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  const claim = btoa(JSON.stringify({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now,
+  })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+
+  const toSign = `${header}.${claim}`;
+  const key = await importRsaKey(sa.private_key);
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(toSign));
+  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+  const jwt = `${toSign}.${sigB64}`;
+
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+  const { access_token } = await res.json();
+  return access_token;
+}
+
+async function importRsaKey(pem) {
+  const pemBody = pem
+    .replace(/-----BEGIN PRIVATE KEY-----/, "")
+    .replace(/-----END PRIVATE KEY-----/, "")
+    .replace(/\n/g, "");
+  const der = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+  return crypto.subtle.importKey(
+    "pkcs8", der.buffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false, ["sign"]
+  );
 }
 
 /* ── Handler principal ───────────────────────────────────────────────────── */
@@ -215,7 +351,7 @@ export default {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1500,
+        max_tokens: 1800,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -250,6 +386,15 @@ export default {
         500,
         origin
       );
+    }
+
+    // Guardar en Google Sheets y Drive de forma asíncrona (no bloqueante)
+    if (env.GOOGLE_SERVICE_ACCOUNT && env.GOOGLE_SHEET_ID) {
+      const ctx = { waitUntil: (p) => p }; // fallback si no hay ctx
+      Promise.all([
+        logToSheet(env, body, parsed),
+        uploadCvToDrive(env, body),
+      ]).catch(console.error);
     }
 
     return jsonResponse({ ok: true, result: parsed }, 200, origin);
