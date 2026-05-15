@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Profesional MPA | Escuela de Gobierno · Universidad de La Sabana</title>
+  <meta name="description"
+    content="Descubre cómo la Maestría en Administración Pública potencia tu trayectoria. Análisis de perfil personalizado, asistido por IA.">
+
+  <!-- Google Fonts: Libre Franklin + Cabinet Grotesk + Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+    rel="stylesheet">
+
+  <!-- Sistema de diseño institucional -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Solo un override mínimo para elementos que no existen en styles.css -->
+  <style>
+    /* Fuente local Publico Banner → fallback a Playfair Display (ya cargada) */
+    @font-face {
+      font-family: 'Publico Banner';
+      src: url('./assets/fonts/PublicoBannerWeb-LightItalic_govlab.woff2') format('woff2');
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Elementos específicos del Match que no están en styles.css */
+    .match-hero {
+      background: linear-gradient(135deg, var(--c-blue-dark) 0%, var(--c-blue-light) 100%);
+      color: #fff;
+      padding: 5rem 2rem;
+      text-align: center;
+    }
+
+    .match-hero h1 {
+      color: #fff;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+
+    .match-hero h1 em {
+      font-style: italic;
+      color: var(--c-yellow);
+    }
+
+    .match-hero p {
+      font-size: 1.1rem;
+      opacity: 0.88;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .match-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    .form-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-one-col {
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .field label {
+      font-family: var(--font-label);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: var(--font-main);
+      font-size: var(--fs-md);
+      color: var(--text-primary);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--c-blue-light);
+      box-shadow: 0 0 0 3px rgba(0, 56, 125, 0.1);
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.6;
+    }
+
+    /* Resultado */
+    #results-area {
+      display: none;
+      margin-top: 3rem;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .result-section-title {
+      font-size: var(--fs-sm);
+      font-family: var(--font-label);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+      color: var(--c-blue-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-text {
+      color: var(--text-secondary);
+      font-size: var(--fs-md);
+      line-height: var(--lh);
+    }
+
+    .ficha-interna {
+      background-color: var(--c-blue-tint);
+      border-left: 4px solid var(--c-blue-dark);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      font-family: var(--font-main);
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+      white-space: pre-line;
+      line-height: 1.7;
+    }
+
+    .spinner-inline {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .form-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════════════════════════════ -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <div class="nav-logos">
+        <img src="assets/Govlab.png" class="logo-govlab" alt="GovLab">
+        <div class="logo-divider"></div>
+        <img src="assets/Egus.png" class="logo-unisabana" alt="Escuela de Gobierno">
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ═══════════════════════════════════════════════════════ -->
+  <header class="match-hero">
+    <h1>Tu experiencia tiene valor.<br><em>El MPA puede convertirla</em><br>en ruta de crecimiento.</h1>
+    <p>Cuéntanos sobre tu trayectoria y te mostramos, de forma personalizada, cómo la Maestría en Administración
+      Pública puede potenciar tu carrera en lo público.</p>
+  </header>
+
+  <!-- ══ FORMULARIO ══════════════════════════════════════════════════ -->
+  <div class="match-body">
+    <section class="module-card" style="padding: 2.5rem;">
+
+      <h2 style="margin-bottom: 0.25rem;">Tu perfil</h2>
+      <p class="section-subtitle" style="margin-bottom: 2rem;">Mientras más detalle compartas, más preciso será el
+        análisis.</p>
+
+      <form id="match-form">
+        <div class="form-two-col">
+          <div class="field">
+            <label for="f-cargo">Cargo o rol actual</label>
+            <input type="text" id="f-cargo" placeholder="Ej: Coordinadora de proyectos" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="f-sector">Sector</label>
+            <select id="f-sector">
+              <option value="">Selecciona...</option>
+              <option>Gobierno nacional</option>
+              <option>Gobierno territorial (gobernación / municipio)</option>
+              <option>Sector privado</option>
+              <option>Organizaciones sociales / ONG</option>
+              <option>Academia / investigación</option>
+              <option>Organismos internacionales</option>
+              <option>Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-two-col">
+          <div class="field">
+            <label for="f-anos">Años de experiencia laboral</label>
+            <select id="f-anos">
+              <option value="">Selecciona...</option>
+              <option>Menos de 2 años</option>
+              <option>2 a 5 años</option>
+              <option>5 a 10 años</option>
+              <option>Más de 10 años</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-intereses">Temas de interés <span style="font-weight:300; text-transform:none;">(opcional)</span></label>
+            <input type="text" id="f-intereses" placeholder="Ej: gestión territorial, innovación...">
+          </div>
+        </div>
+
+        <div class="form-one-col">
+          <div class="field">
+            <label for="f-experiencia">Tu experiencia y logros más relevantes</label>
+            <textarea id="f-experiencia"
+              placeholder="Ej: He liderado equipos en diseño de proyectos sociales en municipios de Cundinamarca..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-one-col">
+          <div class="field">
+            <label for="f-motivacion">¿Por qué te interesa el MPA? ¿Qué esperas lograr?</label>
+            <textarea id="f-motivacion"
+              placeholder="Ej: Quiero tomar decisiones de política pública con mayor rigor..."></textarea>
+          </div>
+        </div>
+
+        <div id="error-msg"
+          style="display:none; background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:0.75rem 1rem; color:#991B1B; font-size:var(--fs-md); margin-bottom:1rem;">
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-giant-primary" id="btn-submit"
+            style="display:inline-flex; align-items:center; gap:0.75rem;">
+            <div class="spinner-inline" id="spinner"></div>
+            <span id="btn-text">Analizar mi perfil match</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ══ RESULTADO ═══════════════════════════════════════════════ -->
+    <section id="results-area">
+      <div class="module-card" style="padding: 2.5rem; border-top: 5px solid var(--c-blue-dark);">
+
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
+          <h2 style="margin:0;">Tu <em style="color:var(--c-blue-light);">match</em> con el MPA</h2>
+          <div id="r-badges" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2rem;">
+          <div>
+            <p class="result-section-title">Conexión con tu trayectoria</p>
+            <p class="result-text" id="r-conexion"></p>
+          </div>
+          <div>
+            <p class="result-section-title">Competencias que el MPA potencia</p>
+            <p class="result-text" id="r-competencias"></p>
+          </div>
+          <div>
+            <p class="result-section-title">Líneas académicas clave</p>
+            <p class="result-text" id="r-lineas"></p>
+          </div>
+          <div>
+            <p class="result-section-title">Proyección como graduado/a</p>
+            <p class="result-text" id="r-proyeccion"></p>
+          </div>
+        </div>
+
+        <p class="result-section-title">Ficha interna · Escuela de Gobierno</p>
+        <div class="ficha-interna" id="r-ficha"></div>
+
+        <div class="text-center" style="margin-top:2rem;">
+          <button class="btn btn-outline btn-large" onclick="window.print()">Guardar análisis (PDF)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PIE ═══════════════════════════════════════════════════════ -->
+    <p style="text-align:center; color:var(--text-muted); font-size:var(--fs-sm); margin-top:3rem; line-height:1.6;">
+      Este análisis es orientativo y se basa exclusivamente en la información oficial del MPA.<br>
+      No reemplaza el proceso de admisión ni implica decisiones de selección.<br><br>
+      ¿Tienes preguntas? Escríbenos a
+      <a href="mailto:escueladegobierno@unisabana.edu.co">escueladegobierno@unisabana.edu.co</a>
+    </p>
+  </div>
+
+  <script>
+    const form = document.getElementById('match-form');
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+    const resultsArea = document.getElementById('results-area');
+    const errorMsg = document.getElementById('error-msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+
+      const experiencia = document.getElementById('f-experiencia').value.trim();
+      const motivacion = document.getElementById('f-motivacion').value.trim();
+
+      if (!experiencia && !motivacion) {
+        errorMsg.textContent = 'Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'Analizando tu perfil...';
+      resultsArea.style.display = 'none';
+
+      const payload = {
+        cargo: document.getElementById('f-cargo').value,
+        sector: document.getElementById('f-sector').value,
+        anos: document.getElementById('f-anos').value,
+        intereses: document.getElementById('f-intereses').value,
+        experiencia,
+        motivacion
+      };
+
+      try {
+        const res = await fetch('https://mpa-match.juandiegosotagui.workers.dev/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+          renderResults(data.result);
+        } else {
+          throw new Error(data.error || `Error ${res.status}`);
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Ocurrió un error: ' + err.message + '. Por favor intenta de nuevo.';
+        errorMsg.style.display = 'block';
+      } finally {
+        btnSubmit.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Analizar mi perfil match';
+      }
+    });
+
+    function renderResults(res) {
+      document.getElementById('r-conexion').textContent = res.conexion || '';
+      document.getElementById('r-competencias').textContent = res.competencias || '';
+      document.getElementById('r-lineas').textContent = res.lineas || '';
+      document.getElementById('r-proyeccion').textContent = res.proyeccion || '';
+      document.getElementById('r-ficha').textContent = res.ficha_interna || '';
+
+      const badges = document.getElementById('r-badges');
+      badges.innerHTML = '';
+      const badgeColors = { 'Líder': '#4C51BF', 'Estratega': '#2F855A', 'Gerente': '#C05621' };
+      (res.perfil_dominante || []).forEach(p => {
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.style.background = badgeColors[p] || 'var(--c-blue-dark)';
+        b.style.color = '#fff';
+        b.style.borderColor = 'transparent';
+        b.textContent = p;
+        badges.appendChild(b);
+      });
+
+      resultsArea.style.display = 'block';
+      resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ── Ctrl+M → Rellenar con ejemplo ────────────────────────── */
+    const EJEMPLO = {
+      cargo: "Coordinadora de Proyectos Sociales",
+      sector: "Gobierno territorial (gobernación / municipio)",
+      anos: "5 a 10 años",
+      intereses: "innovación pública, gestión territorial, política social",
+      experiencia: "He liderado equipos multidisciplinarios en el diseño e implementación de proyectos sociales en 12 municipios de Cundinamarca. Formulé un programa de inclusión productiva que benefició a 800 familias en situación de vulnerabilidad, articulando recursos de la gobernación con cooperación internacional.",
+      motivacion: "Quiero tomar decisiones de política pública con mayor rigor técnico y evidencia. Me interesa aprender a diseñar programas que realmente transformen los territorios donde trabajo."
+    };
+    document.addEventListener("keydown", function (e) {
+      if (e.ctrlKey && e.key === "m") {
+        e.preventDefault();
+        document.getElementById("f-cargo").value = EJEMPLO.cargo;
+        document.getElementById("f-intereses").value = EJEMPLO.intereses;
+        document.getElementById("f-experiencia").value = EJEMPLO.experiencia;
+        document.getElementById("f-motivacion").value = EJEMPLO.motivacion;
+        const selSector = document.getElementById("f-sector");
+        for (let i = 0; i < selSector.options.length; i++) {
+          if (selSector.options[i].text === EJEMPLO.sector) { selSector.selectedIndex = i; break; }
+        }
+        const selAnos = document.getElementById("f-anos");
+        for (let i = 0; i < selAnos.options.length; i++) {
+          if (selAnos.options[i].text === EJEMPLO.anos) { selAnos.selectedIndex = i; break; }
+        }
+      }
+    });
+  </script>
+
+</body>
+
+</html>
