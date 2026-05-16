@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -70,6 +70,18 @@
     .cv-link:hover { text-decoration:underline; }
     #loading-msg { text-align:center;padding:3rem;color:var(--muted); }
 
+    /* USAGE STATS */
+    .usage-section { margin-bottom:1.25rem; }
+    .usage-section h2 { font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-bottom:.75rem; }
+    .stats-row { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.85rem;margin-bottom:.85rem; }
+    .stat-card { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .stat-card .slabel { font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--muted);margin-bottom:.2rem; }
+    .stat-card .sval { font-size:1.5rem;font-weight:700;color:var(--blue);line-height:1.1; }
+    .stat-card .ssub { font-size:.72rem;color:var(--muted);margin-top:.15rem; }
+    .usage-chart-wrap { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .usage-chart-wrap h3 { font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-bottom:.75rem; }
+    #ch-uso-wrap { position:relative;height:160px; }
+
     /* MODAL */
     #modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:1rem; }
     #modal-overlay.open { display:flex; }
@@ -92,23 +104,41 @@
   <div class="login-box">
     <h1>Dashboard MPA</h1>
     <p>Acceso restringido al equipo de la Escuela de Gobierno</p>
-    <input type="password" id="pwd-input" placeholder="Contraseña">
+    <input type="password" id="pwd-input" placeholder="ContraseÃ±a">
     <button id="pwd-btn">Ingresar</button>
     <div id="login-error"></div>
   </div>
 </div>
 
 <header>
-  <h1>Dashboard · Postulantes MPA</h1>
-  <span id="total-badge">— candidatos</span>
-  <button id="logout-btn">Cerrar sesión</button>
+  <h1>Dashboard Â· Postulantes MPA</h1>
+  <span id="total-badge">â€” candidatos</span>
+  <button id="logout-btn">Cerrar sesiÃ³n</button>
 </header>
 
 <main>
+  <!-- USO Y COSTOS -->
+  <div class="usage-section" id="usage-section" style="display:none;">
+    <h2>Uso de la herramienta</h2>
+    <div class="stats-row">
+      <div class="stat-card"><div class="slabel">Total usos</div><div class="sval" id="su-total">â€”</div></div>
+      <div class="stat-card"><div class="slabel">Ultima hora</div><div class="sval" id="su-hora">â€”</div></div>
+      <div class="stat-card"><div class="slabel">Ultimas 24 h</div><div class="sval" id="su-dia">â€”</div></div>
+      <div class="stat-card"><div class="slabel">Ultimos 7 dias</div><div class="sval" id="su-semana">â€”</div></div>
+      <div class="stat-card"><div class="slabel">Tokens totales</div><div class="sval" id="su-tokens">â€”</div><div class="ssub" id="su-tokens-sub"></div></div>
+      <div class="stat-card"><div class="slabel">Costo estimado</div><div class="sval" id="su-costo">â€”</div><div class="ssub">Haiku 4.5</div></div>
+      <div class="stat-card"><div class="slabel">Costo promedio</div><div class="sval" id="su-avg">â€”</div><div class="ssub">por consulta</div></div>
+    </div>
+    <div class="usage-chart-wrap">
+      <h3>Consultas por dia (ultimos 14 dias)</h3>
+      <div id="ch-uso-wrap"><canvas id="ch-uso"></canvas></div>
+    </div>
+  </div>
+
   <!-- FILTROS -->
   <div class="filters-bar" id="filters-bar">
     <div>
-      <label>Búsqueda</label>
+      <label>BÃºsqueda</label>
       <input type="search" id="f-search" placeholder="Nombre, email, cargo..." style="width:200px;">
     </div>
     <div>
@@ -120,7 +150,7 @@
       <select id="f-sector"><option value="">Todos</option></select>
     </div>
     <div>
-      <label>Años de experiencia</label>
+      <label>AÃ±os de experiencia</label>
       <select id="f-anos"><option value="">Todos</option></select>
     </div>
     <div>
@@ -128,7 +158,7 @@
       <select id="f-edad"><option value="">Todos</option></select>
     </div>
     <div>
-      <label>Formación</label>
+      <label>FormaciÃ³n</label>
       <select id="f-formacion"><option value="">Todos</option></select>
     </div>
     <div style="align-self:flex-end;">
@@ -140,9 +170,9 @@
   <div class="charts-grid">
     <div class="chart-card"><h3>Perfil dominante</h3><div class="chart-wrap"><canvas id="ch-perfil"></canvas></div></div>
     <div class="chart-card"><h3>Sector</h3><div class="chart-wrap"><canvas id="ch-sector"></canvas></div></div>
-    <div class="chart-card"><h3>Años de experiencia</h3><div class="chart-wrap"><canvas id="ch-anos"></canvas></div></div>
+    <div class="chart-card"><h3>AÃ±os de experiencia</h3><div class="chart-wrap"><canvas id="ch-anos"></canvas></div></div>
     <div class="chart-card"><h3>Rango de edad</h3><div class="chart-wrap"><canvas id="ch-edad"></canvas></div></div>
-    <div class="chart-card"><h3>Nivel de formación</h3><div class="chart-wrap"><canvas id="ch-formacion"></canvas></div></div>
+    <div class="chart-card"><h3>Nivel de formaciÃ³n</h3><div class="chart-wrap"><canvas id="ch-formacion"></canvas></div></div>
     <div class="chart-card"><h3>CV adjunto</h3><div class="chart-wrap"><canvas id="ch-cv"></canvas></div></div>
   </div>
 
@@ -161,10 +191,10 @@
           <th>Email</th>
           <th>Cargo</th>
           <th>Sector</th>
-          <th>Años exp.</th>
+          <th>AÃ±os exp.</th>
           <th>Edad</th>
-          <th>Formación</th>
-          <th>Institución</th>
+          <th>FormaciÃ³n</th>
+          <th>InstituciÃ³n</th>
           <th>Intereses</th>
           <th>Perfil</th>
           <th>Frase potente</th>
@@ -180,34 +210,34 @@
 <div id="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="m-nombre">—</h2>
+      <h2 id="m-nombre">â€”</h2>
       <button class="modal-close" id="modal-close">&#x2715;</button>
     </div>
     <div class="modal-grid">
-      <div><div class="mlabel">Email</div><div class="mval" id="m-email">—</div></div>
-      <div><div class="mlabel">Fecha</div><div class="mval" id="m-fecha">—</div></div>
-      <div><div class="mlabel">Cargo</div><div class="mval" id="m-cargo">—</div></div>
-      <div><div class="mlabel">Sector</div><div class="mval" id="m-sector">—</div></div>
-      <div><div class="mlabel">Años de experiencia</div><div class="mval" id="m-anos">—</div></div>
-      <div><div class="mlabel">Edad</div><div class="mval" id="m-edad">—</div></div>
-      <div><div class="mlabel">Formación</div><div class="mval" id="m-formacion">—</div></div>
-      <div><div class="mlabel">Institución</div><div class="mval" id="m-inst">—</div></div>
+      <div><div class="mlabel">Email</div><div class="mval" id="m-email">â€”</div></div>
+      <div><div class="mlabel">Fecha</div><div class="mval" id="m-fecha">â€”</div></div>
+      <div><div class="mlabel">Cargo</div><div class="mval" id="m-cargo">â€”</div></div>
+      <div><div class="mlabel">Sector</div><div class="mval" id="m-sector">â€”</div></div>
+      <div><div class="mlabel">AÃ±os de experiencia</div><div class="mval" id="m-anos">â€”</div></div>
+      <div><div class="mlabel">Edad</div><div class="mval" id="m-edad">â€”</div></div>
+      <div><div class="mlabel">FormaciÃ³n</div><div class="mval" id="m-formacion">â€”</div></div>
+      <div><div class="mlabel">InstituciÃ³n</div><div class="mval" id="m-inst">â€”</div></div>
     </div>
-    <div class="modal-sec"><div class="mlabel">Perfil dominante</div><div class="mval" id="m-perfil">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Temas de interés</div><div class="mval" id="m-intereses">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Experiencia y logros</div><div class="mval" id="m-exp">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Motivación</div><div class="mval" id="m-mot">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Conexión con el MPA</div><div class="mval" id="m-con">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Competencias</div><div class="mval" id="m-comp">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Líneas académicas</div><div class="mval" id="m-lin">—</div></div>
-    <div class="modal-sec"><div class="mlabel">Proyección</div><div class="mval" id="m-proy">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Perfil dominante</div><div class="mval" id="m-perfil">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">Temas de interÃ©s</div><div class="mval" id="m-intereses">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">Experiencia y logros</div><div class="mval" id="m-exp">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">MotivaciÃ³n</div><div class="mval" id="m-mot">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">ConexiÃ³n con el MPA</div><div class="mval" id="m-con">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">Competencias</div><div class="mval" id="m-comp">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">LÃ­neas acadÃ©micas</div><div class="mval" id="m-lin">â€”</div></div>
+    <div class="modal-sec"><div class="mlabel">ProyecciÃ³n</div><div class="mval" id="m-proy">â€”</div></div>
     <div class="frase-box">
       <div class="mlabel">Frase potente</div>
-      <div class="mval" id="m-frase">—</div>
+      <div class="mval" id="m-frase">â€”</div>
     </div>
     <div class="modal-sec" style="margin-top:1rem;">
       <div class="mlabel">Hoja de vida</div>
-      <div class="mval" id="m-cv">—</div>
+      <div class="mval" id="m-cv">â€”</div>
     </div>
   </div>
 </div>
@@ -221,7 +251,7 @@
 
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  /* ── LOGIN ── */
+  /* â”€â”€ LOGIN â”€â”€ */
   const overlay = document.getElementById('login-overlay');
   document.getElementById('pwd-btn').addEventListener('click', tryLogin);
   document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
@@ -232,12 +262,12 @@
       overlay.style.display = 'none';
       loadData();
     } else {
-      document.getElementById('login-error').textContent = 'Contraseña incorrecta.';
+      document.getElementById('login-error').textContent = 'ContraseÃ±a incorrecta.';
       document.getElementById('pwd-input').value = '';
     }
   }
 
-  /* ── DATA ── */
+  /* â”€â”€ DATA â”€â”€ */
   let allRows = [], charts = {};
 
   async function loadData() {
@@ -246,11 +276,13 @@
     allRows = data || [];
     document.getElementById('loading-msg').style.display = 'none';
     document.getElementById('tbl').style.display = 'table';
+    document.getElementById('usage-section').style.display = 'block';
+    buildUsage(allRows);
     populateFilters(allRows);
     applyFilters();
   }
 
-  /* ── FILTERS ── */
+  /* â”€â”€ FILTERS â”€â”€ */
   function populateFilters(rows) {
     const fields = { 'f-perfil': 'perfil_dominante', 'f-sector': 'sector', 'f-anos': 'anos_exp', 'f-edad': 'edad', 'f-formacion': 'formacion' };
     Object.entries(fields).forEach(([selId, field]) => {
@@ -295,7 +327,7 @@
     renderTable(filtered);
   }
 
-  /* ── CHARTS ── */
+  /* â”€â”€ CHARTS â”€â”€ */
   function dist(rows, field) {
     const counts = {};
     rows.forEach(r => { const v = r[field] || 'Sin dato'; counts[v] = (counts[v]||0) + 1; });
@@ -341,11 +373,11 @@
     makeOrUpdateChart('ch-cv',       null,               rows, cvDist);
   }
 
-  /* ── TABLE ── */
+  /* â”€â”€ TABLE â”€â”€ */
   function clip(val, len = 60) {
-    if (!val) return '<span style="color:#bbb">—</span>';
+    if (!val) return '<span style="color:#bbb">â€”</span>';
     const s = String(val);
-    return s.length <= len ? s : `<span class="cell-clip" title="${s.replace(/"/g,'&quot;')}">${s.substring(0,len)}…</span>`;
+    return s.length <= len ? s : `<span class="cell-clip" title="${s.replace(/"/g,'&quot;')}">${s.substring(0,len)}â€¦</span>`;
   }
 
   function renderTable(rows) {
@@ -355,21 +387,21 @@
       const tr = document.createElement('tr');
       const fecha = r.created_at
         ? new Date(r.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'})
-        : '—';
+        : 'â€”';
       tr.innerHTML = `
         <td style="white-space:nowrap;color:var(--muted);font-size:.78rem;">${fecha}</td>
-        <td><strong>${r.nombre||'—'}</strong></td>
-        <td style="color:var(--muted)">${r.email||'—'}</td>
+        <td><strong>${r.nombre||'â€”'}</strong></td>
+        <td style="color:var(--muted)">${r.email||'â€”'}</td>
         <td>${clip(r.cargo,30)}</td>
         <td style="font-size:.78rem">${clip(r.sector,35)}</td>
-        <td style="font-size:.78rem">${r.anos_exp||'—'}</td>
-        <td style="font-size:.78rem">${r.edad||'—'}</td>
-        <td style="font-size:.78rem">${r.formacion||'—'}</td>
+        <td style="font-size:.78rem">${r.anos_exp||'â€”'}</td>
+        <td style="font-size:.78rem">${r.edad||'â€”'}</td>
+        <td style="font-size:.78rem">${r.formacion||'â€”'}</td>
         <td style="font-size:.78rem">${clip(r.institucion,25)}</td>
         <td>${clip(r.intereses,40)}</td>
-        <td><span class="badge">${r.perfil_dominante||'—'}</span></td>
+        <td><span class="badge">${r.perfil_dominante||'â€”'}</span></td>
         <td>${clip(r.frase_potente,55)}</td>
-        <td id="cv-${r.id}"><span style="color:#bbb;font-size:.78rem">—</span></td>`;
+        <td id="cv-${r.id}"><span style="color:#bbb;font-size:.78rem">â€”</span></td>`;
       tr.addEventListener('click', () => openModal(r));
       tbody.appendChild(tr);
       if (r.cv_path) loadCvLink(r.id, r.cv_path);
@@ -382,11 +414,11 @@
     if (cell) cell.innerHTML = `<a class="cv-link" href="${url}" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>`;
   }
 
-  /* ── MODAL ── */
-  function s(id, val) { document.getElementById(id).textContent = val || '—'; }
+  /* â”€â”€ MODAL â”€â”€ */
+  function s(id, val) { document.getElementById(id).textContent = val || 'â€”'; }
 
   async function openModal(r) {
-    const fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-CO',{timeZone:'America/Bogota'}) : '—';
+    const fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-CO',{timeZone:'America/Bogota'}) : 'â€”';
     document.getElementById('m-nombre').textContent = r.nombre || 'Sin nombre';
     s('m-email', r.email); s('m-fecha', fecha); s('m-cargo', r.cargo);
     s('m-sector', r.sector); s('m-anos', r.anos_exp); s('m-edad', r.edad);
@@ -401,7 +433,7 @@
       const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${r.cv_path}`;
       cvEl.innerHTML = `<a class="cv-link" href="${url}" target="_blank">Descargar PDF</a>`;
     } else {
-      cvEl.textContent = 'No adjuntó CV';
+      cvEl.textContent = 'No adjuntÃ³ CV';
     }
     document.getElementById('modal-overlay').classList.add('open');
   }
@@ -415,3 +447,4 @@
 </script>
 </body>
 </html>
+

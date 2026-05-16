@@ -201,7 +201,7 @@ function buildUserMessage(body) {
 }
 
 /* ── Supabase: registrar metadatos del postulante ────────────────────────── */
-async function logToSupabase(env, body, result) {
+async function logToSupabase(env, body, result, usage) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SECRET_KEY) {
     console.warn("[Supabase] Faltan secrets SUPABASE_URL o SUPABASE_SECRET_KEY");
     return;
@@ -229,6 +229,9 @@ async function logToSupabase(env, body, result) {
       lineas: result.lineas || null,
       proyeccion: result.proyeccion || null,
       frase_potente: result.frase_potente || null,
+      // Uso de tokens (Claude Haiku 4.5)
+      input_tokens:  usage?.input_tokens  || null,
+      output_tokens: usage?.output_tokens || null,
     };
 
     const res = await fetch(
@@ -344,9 +347,12 @@ export default {
       );
     }
 
+    // Capturar uso de tokens de la respuesta de Anthropic
+    const usage = data.usage || {};
+    console.log("[Worker] Tokens — input:", usage.input_tokens, "output:", usage.output_tokens);
+
     // Guardar en Supabase — ctx.waitUntil mantiene el Worker vivo
-    // hasta que termine la llamada, sin bloquear la respuesta al cliente.
-    ctx.waitUntil(logToSupabase(env, body, parsed));
+    ctx.waitUntil(logToSupabase(env, body, parsed, usage));
 
     return jsonResponse({ ok: true, result: parsed }, 200, origin);
   },
