@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard MPA | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #00135B;
+      --blue-lg: #e8eaf6;
+      --accent:  #3D5AFE;
+      --bg:      #f4f6fb;
+      --card:    #ffffff;
+      --border:  #dde1ee;
+      --text:    #1a1f36;
+      --muted:   #6b7280;
+      --radius:  12px;
+      --font:    'Libre Franklin', sans-serif;
+    }
+
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── LOGIN OVERLAY ── */
+    #login-overlay {
+      position: fixed; inset: 0; background: var(--blue);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .login-box {
+      background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
+      width: min(380px, 90vw); text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.25);
+    }
+    .login-box h1 { font-size: 1.3rem; color: var(--blue); margin-bottom: .35rem; }
+    .login-box p  { font-size: .85rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .login-box input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .75rem 1rem; font-size: .95rem; font-family: var(--font);
+      margin-bottom: .75rem; outline: none; transition: border-color .2s;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box button {
+      width: 100%; background: var(--blue); color: #fff; border: none;
+      border-radius: 8px; padding: .8rem; font-size: .95rem; font-family: var(--font);
+      font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .login-box button:hover { background: var(--accent); }
+    #login-error { color: #e53e3e; font-size: .82rem; margin-top: .5rem; min-height: 1.1rem; }
+
+    /* ── TOPBAR ── */
+    header {
+      background: var(--blue); color: #fff; padding: 1rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 600; flex: 1; }
+    #total-badge {
+      background: rgba(255,255,255,.15); border-radius: 999px;
+      padding: .25rem .9rem; font-size: .82rem; font-weight: 600;
+    }
+    #logout-btn {
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+      color: #fff; border-radius: 8px; padding: .35rem .9rem;
+      font-size: .8rem; cursor: pointer; font-family: var(--font); transition: background .2s;
+    }
+    #logout-btn:hover { background: rgba(255,255,255,.22); }
+
+    /* ── MAIN ── */
+    main { max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── CHARTS GRID ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    .chart-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1.25rem; border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    .chart-card h3 {
+      font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; color: var(--muted); margin-bottom: 1rem;
+    }
+    .chart-wrap { position: relative; height: 200px; }
+
+    /* ── TABLE SECTION ── */
+    .section-header {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .section-header h2 { font-size: 1.05rem; font-weight: 700; flex: 1; }
+    #search-input {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .45rem .85rem; font-size: .88rem; font-family: var(--font);
+      outline: none; width: 220px; transition: border-color .2s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+
+    .table-wrap {
+      background: var(--card); border-radius: var(--radius);
+      border: 1px solid var(--border); overflow: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    thead th {
+      background: var(--blue-lg); color: var(--blue); font-weight: 700;
+      font-size: .73rem; text-transform: uppercase; letter-spacing: .07em;
+      padding: .75rem 1rem; text-align: left; white-space: nowrap;
+      border-bottom: 2px solid var(--border); position: sticky; top: 0;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--blue-lg); }
+    td { padding: .65rem 1rem; vertical-align: top; }
+
+    .cell-truncate {
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; display: block;
+    }
+    .expand-btn {
+      background: none; border: none; color: var(--accent);
+      font-size: .75rem; cursor: pointer; font-family: var(--font);
+      padding: 0; margin-top: .2rem; font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block; padding: .18rem .55rem; border-radius: 999px;
+      font-size: .72rem; font-weight: 700;
+      background: var(--blue-lg); color: var(--blue); white-space: nowrap;
+    }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 500;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    #modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; width: min(700px, 100%);
+      max-height: 85vh; overflow-y: auto; padding: 2rem;
+      box-shadow: 0 32px 80px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      display: flex; align-items: flex-start; gap: 1rem;
+      margin-bottom: 1.5rem; padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 1.15rem; flex: 1; }
+    .modal-close {
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: var(--muted); line-height: 1;
+    }
+    .modal-section { margin-bottom: 1.25rem; }
+    .modal-label {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; color: var(--muted); margin-bottom: .3rem;
+    }
+    .modal-value { font-size: .9rem; color: var(--text); line-height: 1.6; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    #loading-msg { text-align: center; padding: 3rem; color: var(--muted); font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h1>Dashboard MPA</h1>
+    <p>Acceso restringido al equipo de la Escuela de Gobierno</p>
+    <input type="password" id="pwd-input" placeholder="Contraseña" autocomplete="current-password">
+    <button id="pwd-btn">Ingresar</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<header>
+  <h1>📊 Dashboard · Postulantes MPA</h1>
+  <span id="total-badge">— candidatos</span>
+  <button id="logout-btn">Cerrar sesión</button>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main>
+  <!-- Gráficas -->
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Perfil dominante</h3><div class="chart-wrap"><canvas id="chart-perfil"></canvas></div></div>
+    <div class="chart-card"><h3>Sector</h3><div class="chart-wrap"><canvas id="chart-sector"></canvas></div></div>
+    <div class="chart-card"><h3>Años de experiencia</h3><div class="chart-wrap"><canvas id="chart-anos"></canvas></div></div>
+    <div class="chart-card"><h3>Rango de edad</h3><div class="chart-wrap"><canvas id="chart-edad"></canvas></div></div>
+    <div class="chart-card"><h3>Nivel de formación</h3><div class="chart-wrap"><canvas id="chart-formacion"></canvas></div></div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="section-header">
+    <h2>Candidatos</h2>
+    <input type="search" id="search-input" placeholder="Buscar por nombre, cargo...">
+  </div>
+  <div class="table-wrap">
+    <div id="loading-msg">Cargando datos…</div>
+    <table id="candidates-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Cargo</th>
+          <th>Sector</th>
+          <th>Perfil</th>
+          <th>Frase potente</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ══ MODAL ══ -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-nombre">—</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-grid" style="margin-bottom:1.25rem;">
+      <div><div class="modal-label">Email</div><div class="modal-value" id="m-email">—</div></div>
+      <div><div class="modal-label">Fecha</div><div class="modal-value" id="m-fecha">—</div></div>
+      <div><div class="modal-label">Cargo</div><div class="modal-value" id="m-cargo">—</div></div>
+      <div><div class="modal-label">Sector</div><div class="modal-value" id="m-sector">—</div></div>
+      <div><div class="modal-label">Años exp.</div><div class="modal-value" id="m-anos">—</div></div>
+      <div><div class="modal-label">Edad</div><div class="modal-value" id="m-edad">—</div></div>
+      <div><div class="modal-label">Formación</div><div class="modal-value" id="m-formacion">—</div></div>
+      <div><div class="modal-label">Institución</div><div class="modal-value" id="m-institucion">—</div></div>
+    </div>
+    <div class="modal-section"><div class="modal-label">Perfil dominante</div><div class="modal-value" id="m-perfil">—</div></div>
+    <div class="modal-section"><div class="modal-label">Temas de interés</div><div class="modal-value" id="m-intereses">—</div></div>
+    <div class="modal-section"><div class="modal-label">Experiencia y logros</div><div class="modal-value" id="m-experiencia">—</div></div>
+    <div class="modal-section"><div class="modal-label">Motivación</div><div class="modal-value" id="m-motivacion">—</div></div>
+    <div class="modal-section"><div class="modal-label">Conexión con el MPA</div><div class="modal-value" id="m-conexion">—</div></div>
+    <div class="modal-section"><div class="modal-label">Competencias</div><div class="modal-value" id="m-competencias">—</div></div>
+    <div class="modal-section"><div class="modal-label">Líneas académicas</div><div class="modal-value" id="m-lineas">—</div></div>
+    <div class="modal-section"><div class="modal-label">Proyección</div><div class="modal-value" id="m-proyeccion">—</div></div>
+    <div class="modal-section" style="background:var(--blue);border-radius:10px;padding:1rem 1.25rem;">
+      <div class="modal-label" style="color:rgba(255,255,255,.6);">Frase potente</div>
+      <div class="modal-value" style="color:#fff;font-style:italic;font-size:1rem;" id="m-frase">—</div>
+    </div>
+    <div class="modal-section" style="margin-top:1rem;">
+      <div class="modal-label">CV</div>
+      <div class="modal-value" id="m-cv">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── CONFIG ─────────────────────────────────────────────────────── */
+  const SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
+  const DASHBOARD_PWD = 'MPA2026';   // ← cambia esta contraseña
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  /* ── PALETA ─────────────────────────────────────────────────────── */
+  const COLORS = ['#00135B','#3D5AFE','#7986CB','#9FA8DA','#C5CAE9','#E8EAF6','#536DFE','#304FFE'];
+
+  /* ── LOGIN ──────────────────────────────────────────────────────── */
+  const overlay  = document.getElementById('login-overlay');
+  const pwdInput = document.getElementById('pwd-input');
+  const pwdBtn   = document.getElementById('pwd-btn');
+  const loginErr = document.getElementById('login-error');
+
+  function tryLogin() {
+    if (pwdInput.value === DASHBOARD_PWD) {
+      overlay.style.display = 'none';
+      loadData();
+    } else {
+      loginErr.textContent = 'Contraseña incorrecta.';
+      pwdInput.value = '';
+      pwdInput.focus();
+    }
+  }
+  pwdBtn.addEventListener('click', tryLogin);
+  pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    overlay.style.display = 'flex';
+    pwdInput.value = '';
+  });
+
+  /* ── DATA ───────────────────────────────────────────────────────── */
+  let allRows = [];
+
+  async function loadData() {
+    const { data, error } = await db
+      .from('postulantes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('loading-msg').textContent = 'Error cargando datos: ' + error.message;
+      return;
+    }
+
+    allRows = data || [];
+    document.getElementById('total-badge').textContent = allRows.length + ' candidatos';
+    document.getElementById('loading-msg').style.display = 'none';
+    document.getElementById('candidates-table').style.display = 'table';
+
+    buildCharts(allRows);
+    renderTable(allRows);
+  }
+
+  /* ── CHARTS ─────────────────────────────────────────────────────── */
+  function dist(rows, field) {
+    const counts = {};
+    rows.forEach(r => {
+      const v = r[field] || 'Sin dato';
+      counts[v] = (counts[v] || 0) + 1;
+    });
+    const total = rows.length || 1;
+    const labels = Object.keys(counts);
+    const data   = labels.map(l => Math.round(counts[l] / total * 100));
+    return { labels, data };
+  }
+
+  function makeChart(id, field, rows) {
+    const { labels, data } = dist(rows, field);
+    new Chart(document.getElementById(id), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: COLORS.slice(0, labels.length), borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 11, family: "'Libre Franklin', sans-serif" }, boxWidth: 12, padding: 8 } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` } }
+        }
+      }
+    });
+  }
+
+  function buildCharts(rows) {
+    makeChart('chart-perfil',   'perfil_dominante', rows);
+    makeChart('chart-sector',   'sector',           rows);
+    makeChart('chart-anos',     'anos_exp',         rows);
+    makeChart('chart-edad',     'edad',             rows);
+    makeChart('chart-formacion','formacion',        rows);
+  }
+
+  /* ── TABLE ──────────────────────────────────────────────────────── */
+  function fmt(val, max = 80) {
+    if (!val) return '<span style="color:#aaa">—</span>';
+    const escaped = val.replace(/</g, '&lt;');
+    if (escaped.length <= max) return escaped;
+    return `<span class="cell-truncate">${escaped.substring(0, max)}…</span>`;
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      const fecha = r.created_at
+        ? new Date(r.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+      tr.innerHTML = `
+        <td style="white-space:nowrap;color:var(--muted);font-size:.8rem;">${fecha}</td>
+        <td><strong>${r.nombre || '—'}</strong></td>
+        <td style="color:var(--muted)">${r.email || '—'}</td>
+        <td>${fmt(r.cargo, 30)}</td>
+        <td style="font-size:.8rem">${fmt(r.sector, 35)}</td>
+        <td><span class="badge">${r.perfil_dominante || '—'}</span></td>
+        <td style="max-width:220px">${fmt(r.frase_potente, 70)}</td>`;
+      tr.addEventListener('click', () => openModal(r));
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── SEARCH ─────────────────────────────────────────────────────── */
+  document.getElementById('search-input').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const filtered = allRows.filter(r =>
+      (r.nombre || '').toLowerCase().includes(q) ||
+      (r.cargo  || '').toLowerCase().includes(q) ||
+      (r.email  || '').toLowerCase().includes(q) ||
+      (r.sector || '').toLowerCase().includes(q)
+    );
+    renderTable(filtered);
+  });
+
+  /* ── MODAL ──────────────────────────────────────────────────────── */
+  function set(id, val) {
+    document.getElementById(id).textContent = val || '—';
+  }
+
+  function openModal(r) {
+    const fecha = r.created_at
+      ? new Date(r.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota' })
+      : '—';
+
+    document.getElementById('modal-nombre').textContent = r.nombre || 'Sin nombre';
+    set('m-email',       r.email);
+    set('m-fecha',       fecha);
+    set('m-cargo',       r.cargo);
+    set('m-sector',      r.sector);
+    set('m-anos',        r.anos_exp);
+    set('m-edad',        r.edad);
+    set('m-formacion',   r.formacion);
+    set('m-institucion', r.institucion);
+    set('m-perfil',      r.perfil_dominante);
+    set('m-intereses',   r.intereses);
+    set('m-experiencia', r.experiencia);
+    set('m-motivacion',  r.motivacion);
+    set('m-conexion',    r.conexion);
+    set('m-competencias',r.competencias);
+    set('m-lineas',      r.lineas);
+    set('m-proyeccion',  r.proyeccion);
+    set('m-frase',       r.frase_potente);
+
+    const cvEl = document.getElementById('m-cv');
+    if (r.cv_path) {
+      cvEl.innerHTML = `<a href="${SUPABASE_URL}/storage/v1/object/public/hojas-de-vida/${r.cv_path}" target="_blank" style="color:var(--accent)">Ver PDF ↗</a>`;
+    } else {
+      cvEl.textContent = 'No adjuntó CV';
+    }
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  document.getElementById('modal-close').addEventListener('click', () => {
+    document.getElementById('modal-overlay').classList.remove('open');
+  });
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+</script>
+</body>
+</html>
