@@ -560,7 +560,7 @@
     /* ── Supabase client ────────────────────────────────────────── */
     const SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
     const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     const form = document.getElementById('match-form');
     const btnSubmit = document.getElementById('btn-submit');
@@ -644,7 +644,7 @@
       try {
         const safeCargo  = (cargo || 'aspirante').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40);
         const fileName   = `CV_${safeCargo}_${Date.now()}.pdf`;
-        const { data, error } = await supabase.storage
+        const { data, error } = await sbClient.storage
           .from('hojas-de-vida')
           .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
         if (error) {
