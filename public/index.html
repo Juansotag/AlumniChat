@@ -475,7 +475,8 @@
         <!-- Hoja de vida (PDF) -->
         <div class="form-one-col">
           <div class="field">
-            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional — PDF con texto)</span></label>
+            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional — PDF con
+                texto)</span></label>
             <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()">
               <input type="file" id="f-cv" accept=".pdf,application/pdf">
               <span class="file-upload-icon">📋</span>
@@ -570,7 +571,7 @@
 
   <script>
     /* ── Supabase client ────────────────────────────────────────── */
-    const SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
+    const SUPABASE_URL = 'https://tqtiptguuqtxtkizxrko.supabase.co';
     const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -583,7 +584,7 @@
 
     /* ── Drag & drop + extracción de texto de PDF con PDF.js ────── */
     let cvTexto = "";
-    let cvFile  = null;   // archivo original para subir a Supabase
+    let cvFile = null;   // archivo original para subir a Supabase
     const fileInput = document.getElementById('f-cv');
     const fileArea = document.getElementById('file-upload-area');
     const fileNameDisplay = document.getElementById('file-name-display');
@@ -609,10 +610,10 @@
       fileProcessing.style.display = 'flex';
       fileNameDisplay.style.display = 'none';
       cvTexto = '';
-      cvFile  = null;
+      cvFile = null;
 
       try {
-        console.log('[CV] Iniciando lectura del archivo:', file.name, `(${(file.size/1024).toFixed(1)} KB)`);
+        console.log('[CV] Iniciando lectura del archivo:', file.name, `(${(file.size / 1024).toFixed(1)} KB)`);
 
         // Guardar referencia al archivo para subirlo a Supabase al enviar
         cvFile = file;
@@ -643,7 +644,7 @@
         fileNameDisplay.style.display = 'block';
       } catch (err) {
         console.error('[CV] Error procesando PDF:', err);
-        cvFile  = null;
+        cvFile = null;
         cvTexto = '';
       } finally {
         fileProcessing.style.display = 'none';
@@ -654,8 +655,8 @@
     async function uploadCvToSupabase(file, cargo) {
       if (!file) return null;
       try {
-        const safeCargo  = (cargo || 'aspirante').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40);
-        const fileName   = `CV_${safeCargo}_${Date.now()}.pdf`;
+        const safeCargo = (cargo || 'aspirante').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40);
+        const fileName = `CV_${safeCargo}_${Date.now()}.pdf`;
         const { data, error } = await sbClient.storage
           .from('hojas-de-vida')
           .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
@@ -676,10 +677,10 @@
       e.preventDefault();
       errorMsg.style.display = 'none';
 
-      const cargo      = document.getElementById('f-cargo').value.trim();
+      const cargo = document.getElementById('f-cargo').value.trim();
       const experiencia = document.getElementById('f-experiencia').value.trim();
       const motivacion = document.getElementById('f-motivacion').value.trim();
-      const consent    = document.getElementById('f-consent').checked;
+      const consent = document.getElementById('f-consent').checked;
 
       if (!experiencia && !motivacion) {
         showError('Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.');
@@ -705,19 +706,19 @@
       btnText.textContent = 'Analizando tu perfil...';
 
       const payload = {
-        nombre:     document.getElementById('f-nombre').value.trim() || null,
-        email:      document.getElementById('f-email').value.trim()  || null,
+        nombre: document.getElementById('f-nombre').value.trim() || null,
+        email: document.getElementById('f-email').value.trim() || null,
         cargo,
-        sector:     document.getElementById('f-sector').value,
-        anos:       document.getElementById('f-anos').value,
-        edad:       document.getElementById('f-edad').value,
-        formacion:  document.getElementById('f-formacion').value,
+        sector: document.getElementById('f-sector').value,
+        anos: document.getElementById('f-anos').value,
+        edad: document.getElementById('f-edad').value,
+        formacion: document.getElementById('f-formacion').value,
         institucion: document.getElementById('f-institucion').value,
-        intereses:  document.getElementById('f-intereses').value,
+        intereses: document.getElementById('f-intereses').value,
         experiencia,
         motivacion,
         cvTexto: cvTexto || undefined,
-        cvPath:  cvPath  || undefined,
+        cvPath: cvPath || undefined,
       };
 
       console.log('[SUBMIT] Payload:', {
@@ -788,6 +789,8 @@
 
     /* ── Ctrl+M → Rellenar con ejemplo ────────────────────────── */
     const EJEMPLO = {
+      nombre: "Laura Camila Mora Ospina",
+      email: "Lauram.ospina@ejemplo.com",
       cargo: "Coordinadora de Proyectos Sociales",
       sector: "Gobierno territorial (gobernación / municipio)",
       anos: "5 a 10 años",
@@ -801,6 +804,8 @@
     document.addEventListener("keydown", function (e) {
       if (e.ctrlKey && e.key === "m") {
         e.preventDefault();
+        document.getElementById("f-nombre").value = EJEMPLO.nombre;
+        document.getElementById("f-email").value = EJEMPLO.email;
         document.getElementById("f-cargo").value = EJEMPLO.cargo;
         document.getElementById("f-intereses").value = EJEMPLO.intereses;
         document.getElementById("f-experiencia").value = EJEMPLO.experiencia;
