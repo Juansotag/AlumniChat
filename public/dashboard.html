@@ -328,6 +328,53 @@
   }
 
   /* â”€â”€ CHARTS â”€â”€ */
+  /* -- USAGE STATS -- */
+  var PRICE_IN  = 0.80 / 1000000;
+  var PRICE_OUT = 4.00 / 1000000;
+
+  function buildUsage(rows) {
+    var now = Date.now();
+    var h1  = rows.filter(function(r){ return now - new Date(r.created_at) <    3600000; }).length;
+    var h24 = rows.filter(function(r){ return now - new Date(r.created_at) <   86400000; }).length;
+    var d7  = rows.filter(function(r){ return now - new Date(r.created_at) <  604800000; }).length;
+    var totalIn  = rows.reduce(function(s,r){ return s + (r.input_tokens  || 0); }, 0);
+    var totalOut = rows.reduce(function(s,r){ return s + (r.output_tokens || 0); }, 0);
+    var cost    = totalIn * PRICE_IN + totalOut * PRICE_OUT;
+    var avgCost = rows.length ? cost / rows.length : 0;
+    document.getElementById("su-total").textContent      = rows.length;
+    document.getElementById("su-hora").textContent       = h1;
+    document.getElementById("su-dia").textContent        = h24;
+    document.getElementById("su-semana").textContent     = d7;
+    document.getElementById("su-tokens").textContent     = (totalIn+totalOut).toLocaleString("es-CO");
+    document.getElementById("su-tokens-sub").textContent = totalIn.toLocaleString() + " entrada / " + totalOut.toLocaleString() + " salida";
+    document.getElementById("su-costo").textContent      = "$" + cost.toFixed(4);
+    document.getElementById("su-avg").textContent        = "$" + avgCost.toFixed(4);
+    var days = [], counts = [];
+    for (var i = 13; i >= 0; i--) {
+      var d = new Date(); d.setDate(d.getDate() - i);
+      var key = d.toISOString().slice(0, 10);
+      days.push(key.slice(5));
+      counts.push(rows.filter(function(r){ return r.created_at && r.created_at.slice(0,10) === key; }).length);
+    }
+    if (charts["ch-uso"]) {
+      charts["ch-uso"].data.labels = days;
+      charts["ch-uso"].data.datasets[0].data = counts;
+      charts["ch-uso"].update();
+    } else {
+      charts["ch-uso"] = new Chart(document.getElementById("ch-uso"), {
+        type: "bar",
+        data: { labels: days, datasets: [{ data: counts, backgroundColor: "#3D5AFE", borderRadius: 5, label: "Consultas" }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: "#eef" } },
+            x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+  }
   function dist(rows, field) {
     const counts = {};
     rows.forEach(r => { const v = r[field] || 'Sin dato'; counts[v] = (counts[v]||0) + 1; });
