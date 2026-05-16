@@ -103,30 +103,37 @@ PRINCIPIOS IRROMPIBLES:
 - Sé específico: conecta lo que la persona compartió con elementos CONCRETOS del programa.
   Una respuesta genérica que podría aplicar a cualquier aspirante es un fracaso.
 
-CASO ESPECIAL — ASPIRANTE MUY JOVEN (rango de edad "Menos de 25 años"):
-  Si la persona indica que tiene menos de 25 años, debes manejar la situación con calidez y honestidad:
-  - Reconoce genuinamente su potencial y lo valioso de su perfil e inquietudes.
-  - Explica con amabilidad que el MPA está diseñado para profesionales con una trayectoria
-    consolidada, porque el programa se nutre del intercambio entre personas con experiencia real
-    en lo público; esa experiencia previa es lo que hace potentes los aprendizajes.
-  - Invítala/o con entusiasmo a que siga construyendo su trayectoria y que vuelva en unos años,
-    cuando ya tenga esa experiencia: la Escuela de Gobierno la/lo estará esperando.
-  - El tono debe ser inspirador y esperanzador, nunca desalentador. Que sienta que el MPA es
-    una meta alcanzable en su futuro cercano, no una puerta cerrada.
-  - En el campo "frase_potente" escribe algo que celebre su momento actual y anticipe su llegada
-    futura al MPA, como si fuera una promesa mutua entre la Escuela y el aspirante.
+REGLA OBLIGATORIA — ASPIRANTE JOVEN:
+  El campo "Rango de edad" llega con uno de estos valores exactos desde el formulario.
+  Si el valor es "Menos de 25 años" o "25 a 30 años", DEBES aplicar obligatoriamente
+  el siguiente tratamiento y NO el análisis estándar de match:
+
+  TONO: cálido, esperanzador, nunca desalentador. Es una invitación, no un rechazo.
+  1. "conexion": reconoce con genuinidad el potencial que ya muestra. Luego explica con
+     amabilidad que el MPA está diseñado para profesionales con trayectoria consolidada,
+     porque el programa se nutre del intercambio entre pares con experiencia real en lo
+     público; es esa experiencia la que hace potentes los aprendizajes colectivos.
+  2. "competencias": habla de las semillas de liderazgo/estrategia/gerencia que ya ve en
+     su perfil y cómo el MPA las potenciará cuando llegue el momento.
+  3. "proyeccion": invítala/o con entusiasmo a seguir construyendo trayectoria y a volver
+     cuando tenga más experiencia. La Escuela la/lo estará esperando. El MPA es una meta
+     cercana y alcanzable, no una puerta cerrada.
+  4. "frase_potente": escribe una frase que celebre este momento en su carrera y anticipe
+     su llegada futura al MPA — como una promesa mutua entre la Escuela y el aspirante.
 
 CONTEXTO OFICIAL DEL PROGRAMA:
 ${MPA_CONTEXT}
 
-FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown, sin texto adicional:
+FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown, sin texto adicional.
+SI el rango de edad es "Menos de 25 años" o "25 a 30 años", APLICA la REGLA OBLIGATORIA de arriba
+en los campos conexion, competencias, proyeccion y frase_potente. Es mandatorio, no opcional. Escoge SOLO UN PERFIL DOMINANTE
 {
   "perfil_dominante": ["Líder", "Estratega", "Gerente"],
-  "conexion": "2-3 párrafos que conecten la trayectoria específica del aspirante con el perfil del MPA. Menciona elementos concretos de lo que compartió.",
-  "competencias": "Prosa (sin bullets ni listas numeradas) explicando qué competencias del MPA puede FORTALECER esta persona y por qué el programa es su oportunidad de crecimiento en esa dimensión.",
-  "lineas": "2-3 líneas académicas que más le aportarían para desarrollar su oportunidad de crecimiento, con la conexión explícita a su perfil.",
-  "proyeccion": "1-2 párrafos sobre su proyección como graduado/a MPA: qué roles, qué impactos, qué conversaciones podría liderar.",
-  "frase_potente": "Una frase única, inspiradora y personalizada (máximo 2 líneas) que resuma su oportunidad de crecimiento en el MPA. Debe sentirse escrita solo para esta persona, con potencia y calidez."
+  "conexion": "...",
+  "competencias": "...",
+  "lineas": "...",
+  "proyeccion": "...",
+  "frase_potente": "..."
 }`;
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -178,16 +185,16 @@ function buildUserMessage(body) {
     throw new Error("Comparte al menos tu experiencia o tu motivación.");
   }
   return [
-    cargo       && `Cargo actual: ${cargo}`,
-    sector      && `Sector: ${sector}`,
-    anos        && `Años de experiencia: ${anos}`,
-    edad        && `Rango de edad: ${edad}`,
-    formacion   && `Nivel de formación más alto alcanzado: ${formacion}`,
+    cargo && `Cargo actual: ${cargo}`,
+    sector && `Sector: ${sector}`,
+    anos && `Años de experiencia: ${anos}`,
+    edad && `Rango de edad: ${edad}`,
+    formacion && `Nivel de formación más alto alcanzado: ${formacion}`,
     institucion && `Institución donde obtuvo ese título: ${institucion}`,
     experiencia && `Experiencia y logros: ${experiencia}`,
-    motivacion  && `Motivación para el MPA: ${motivacion}`,
-    intereses   && `Temas de interés: ${intereses}`,
-    cvTexto     && `Hoja de vida (texto):\n${cvTexto}`,
+    motivacion && `Motivación para el MPA: ${motivacion}`,
+    intereses && `Temas de interés: ${intereses}`,
+    cvTexto && `Hoja de vida (texto):\n${cvTexto}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -202,37 +209,37 @@ async function logToSupabase(env, body, result) {
   try {
     const row = {
       // Datos personales
-      nombre:           body.nombre      || null,
-      email:            body.email       || null,
+      nombre: body.nombre || null,
+      email: body.email || null,
       // Datos del formulario
-      cargo:            body.cargo       || null,
-      sector:           body.sector      || null,
-      anos_exp:         body.anos        || null,
-      edad:             body.edad        || null,
-      formacion:        body.formacion   || null,
-      institucion:      body.institucion || null,
-      intereses:        body.intereses   || null,
-      experiencia:      body.experiencia || null,
-      motivacion:       body.motivacion  || null,
-      cv_path:          body.cvPath      || null,
+      cargo: body.cargo || null,
+      sector: body.sector || null,
+      anos_exp: body.anos || null,
+      edad: body.edad || null,
+      formacion: body.formacion || null,
+      institucion: body.institucion || null,
+      intereses: body.intereses || null,
+      experiencia: body.experiencia || null,
+      motivacion: body.motivacion || null,
+      cv_path: body.cvPath || null,
       // Respuesta de la IA
       perfil_dominante: (result.perfil_dominante || []).join(", "),
-      conexion:         result.conexion      || null,
-      competencias:     result.competencias  || null,
-      lineas:           result.lineas        || null,
-      proyeccion:       result.proyeccion    || null,
-      frase_potente:    result.frase_potente || null,
+      conexion: result.conexion || null,
+      competencias: result.competencias || null,
+      lineas: result.lineas || null,
+      proyeccion: result.proyeccion || null,
+      frase_potente: result.frase_potente || null,
     };
 
     const res = await fetch(
       `${env.SUPABASE_URL}/rest/v1/postulantes`,
       {
-        method:  "POST",
+        method: "POST",
         headers: {
-          "Content-Type":  "application/json",
-          "apikey":        env.SUPABASE_SECRET_KEY,
+          "Content-Type": "application/json",
+          "apikey": env.SUPABASE_SECRET_KEY,
           "Authorization": `Bearer ${env.SUPABASE_SECRET_KEY}`,
-          "Prefer":        "return=minimal",
+          "Prefer": "return=minimal",
         },
         body: JSON.stringify(row),
       }
@@ -289,7 +296,7 @@ export default {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1800,
+        max_tokens: 2400,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -312,13 +319,24 @@ export default {
 
     const data = await anthropicRes.json();
     const text = data.content?.[0]?.text || "";
+    console.log("[Worker] Respuesta Anthropic (primeros 300 chars):", text.substring(0, 300));
 
     let parsed;
     try {
-      const clean = text.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(clean);
-    } catch {
-      console.error("JSON parse error. Raw text:", text);
+      // Intento 1: limpiar markdown y parsear directo
+      let clean = text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
+
+      // Intento 2: si falla, extraer el primer bloque JSON {...} del texto
+      try {
+        parsed = JSON.parse(clean);
+      } catch {
+        const match = clean.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("No se encontró bloque JSON en la respuesta");
+        parsed = JSON.parse(match[0]);
+      }
+    } catch (e) {
+      console.error("[Worker] JSON parse error:", e.message);
+      console.error("[Worker] Raw text completo:", text);
       return jsonResponse(
         { error: "Error al interpretar la respuesta. Intenta de nuevo." },
         500,

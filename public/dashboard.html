@@ -10,202 +10,150 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --blue:    #00135B;
-      --blue-lg: #e8eaf6;
-      --accent:  #3D5AFE;
-      --bg:      #f4f6fb;
-      --card:    #ffffff;
-      --border:  #dde1ee;
-      --text:    #1a1f36;
-      --muted:   #6b7280;
-      --radius:  12px;
-      --font:    'Libre Franklin', sans-serif;
+      --blue:#00135B; --blue-lg:#e8eaf6; --accent:#3D5AFE;
+      --bg:#f4f6fb; --card:#fff; --border:#dde1ee;
+      --text:#1a1f36; --muted:#6b7280; --radius:12px;
+      --font:'Libre Franklin',sans-serif;
     }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; }
 
-    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    /* LOGIN */
+    #login-overlay { position:fixed;inset:0;background:var(--blue);display:flex;align-items:center;justify-content:center;z-index:1000; }
+    .login-box { background:#fff;border-radius:16px;padding:2.5rem 2rem;width:min(380px,90vw);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.25); }
+    .login-box h1 { font-size:1.3rem;color:var(--blue);margin-bottom:.35rem; }
+    .login-box p  { font-size:.85rem;color:var(--muted);margin-bottom:1.5rem; }
+    .login-box input { width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-size:.95rem;font-family:var(--font);margin-bottom:.75rem;outline:none;transition:border-color .2s; }
+    .login-box input:focus { border-color:var(--accent); }
+    .login-box button { width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.8rem;font-size:.95rem;font-family:var(--font);font-weight:600;cursor:pointer; }
+    .login-box button:hover { background:var(--accent); }
+    #login-error { color:#e53e3e;font-size:.82rem;margin-top:.5rem;min-height:1.1rem; }
 
-    /* ── LOGIN OVERLAY ── */
-    #login-overlay {
-      position: fixed; inset: 0; background: var(--blue);
-      display: flex; align-items: center; justify-content: center; z-index: 1000;
-    }
-    .login-box {
-      background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
-      width: min(380px, 90vw); text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.25);
-    }
-    .login-box h1 { font-size: 1.3rem; color: var(--blue); margin-bottom: .35rem; }
-    .login-box p  { font-size: .85rem; color: var(--muted); margin-bottom: 1.5rem; }
-    .login-box input {
-      width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
-      padding: .75rem 1rem; font-size: .95rem; font-family: var(--font);
-      margin-bottom: .75rem; outline: none; transition: border-color .2s;
-    }
-    .login-box input:focus { border-color: var(--accent); }
-    .login-box button {
-      width: 100%; background: var(--blue); color: #fff; border: none;
-      border-radius: 8px; padding: .8rem; font-size: .95rem; font-family: var(--font);
-      font-weight: 600; cursor: pointer; transition: background .2s;
-    }
-    .login-box button:hover { background: var(--accent); }
-    #login-error { color: #e53e3e; font-size: .82rem; margin-top: .5rem; min-height: 1.1rem; }
+    /* TOPBAR */
+    header { background:var(--blue);color:#fff;padding:1rem 2rem;display:flex;align-items:center;gap:1rem; }
+    header h1 { font-size:1.05rem;font-weight:600;flex:1; }
+    #total-badge { background:rgba(255,255,255,.15);border-radius:999px;padding:.25rem .9rem;font-size:.82rem;font-weight:600; }
+    #logout-btn { background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:.35rem .9rem;font-size:.8rem;cursor:pointer;font-family:var(--font); }
 
-    /* ── TOPBAR ── */
-    header {
-      background: var(--blue); color: #fff; padding: 1rem 2rem;
-      display: flex; align-items: center; gap: 1rem;
-    }
-    header h1 { font-size: 1.1rem; font-weight: 600; flex: 1; }
-    #total-badge {
-      background: rgba(255,255,255,.15); border-radius: 999px;
-      padding: .25rem .9rem; font-size: .82rem; font-weight: 600;
-    }
-    #logout-btn {
-      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
-      color: #fff; border-radius: 8px; padding: .35rem .9rem;
-      font-size: .8rem; cursor: pointer; font-family: var(--font); transition: background .2s;
-    }
-    #logout-btn:hover { background: rgba(255,255,255,.22); }
+    /* MAIN */
+    main { max-width:1400px;margin:0 auto;padding:1.5rem 1.5rem 4rem; }
 
-    /* ── MAIN ── */
-    main { max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    /* FILTERS */
+    .filters-bar { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end; }
+    .filters-bar label { font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--muted);display:block;margin-bottom:.25rem; }
+    .filters-bar select, .filters-bar input[type=search] {
+      border:1.5px solid var(--border);border-radius:8px;padding:.4rem .75rem;font-size:.85rem;font-family:var(--font);outline:none;background:#fff;color:var(--text);transition:border-color .2s;
+    }
+    .filters-bar select:focus, .filters-bar input:focus { border-color:var(--accent); }
+    #btn-reset { background:none;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .9rem;font-size:.8rem;font-family:var(--font);color:var(--muted);cursor:pointer; }
+    #btn-reset:hover { border-color:var(--accent);color:var(--accent); }
 
-    /* ── CHARTS GRID ── */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem; margin-bottom: 2rem;
-    }
-    .chart-card {
-      background: var(--card); border-radius: var(--radius);
-      padding: 1.25rem; border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    }
-    .chart-card h3 {
-      font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
-      font-weight: 700; color: var(--muted); margin-bottom: 1rem;
-    }
-    .chart-wrap { position: relative; height: 200px; }
+    /* CHARTS */
+    .charts-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1.25rem; }
+    .chart-card { background:var(--card);border-radius:var(--radius);padding:1.1rem;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04); }
+    .chart-card h3 { font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-bottom:.75rem; }
+    .chart-wrap { position:relative;height:180px; }
 
-    /* ── TABLE SECTION ── */
-    .section-header {
-      display: flex; align-items: center; gap: 1rem;
-      margin-bottom: 1rem; flex-wrap: wrap;
-    }
-    .section-header h2 { font-size: 1.05rem; font-weight: 700; flex: 1; }
-    #search-input {
-      border: 1.5px solid var(--border); border-radius: 8px;
-      padding: .45rem .85rem; font-size: .88rem; font-family: var(--font);
-      outline: none; width: 220px; transition: border-color .2s;
-    }
-    #search-input:focus { border-color: var(--accent); }
+    /* TABLE */
+    .section-hdr { display:flex;align-items:center;gap:1rem;margin-bottom:.75rem; }
+    .section-hdr h2 { font-size:1rem;font-weight:700;flex:1; }
+    .table-wrap { background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:auto;box-shadow:0 2px 8px rgba(0,0,0,.04);max-height:520px; }
+    table { width:100%;border-collapse:collapse;font-size:.82rem; }
+    thead th { background:var(--blue-lg);color:var(--blue);font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;padding:.65rem .9rem;text-align:left;white-space:nowrap;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1; }
+    tbody tr { border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--blue-lg); }
+    td { padding:.55rem .9rem;vertical-align:top;max-width:200px; }
+    .cell-clip { overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block; }
+    .badge { display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.7rem;font-weight:700;background:var(--blue-lg);color:var(--blue);white-space:nowrap; }
+    .cv-link { color:var(--accent);font-weight:600;font-size:.78rem;text-decoration:none; }
+    .cv-link:hover { text-decoration:underline; }
+    #loading-msg { text-align:center;padding:3rem;color:var(--muted); }
 
-    .table-wrap {
-      background: var(--card); border-radius: var(--radius);
-      border: 1px solid var(--border); overflow: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    }
-    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    thead th {
-      background: var(--blue-lg); color: var(--blue); font-weight: 700;
-      font-size: .73rem; text-transform: uppercase; letter-spacing: .07em;
-      padding: .75rem 1rem; text-align: left; white-space: nowrap;
-      border-bottom: 2px solid var(--border); position: sticky; top: 0;
-    }
-    tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; cursor: pointer; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: var(--blue-lg); }
-    td { padding: .65rem 1rem; vertical-align: top; }
-
-    .cell-truncate {
-      max-width: 200px; overflow: hidden; text-overflow: ellipsis;
-      white-space: nowrap; display: block;
-    }
-    .expand-btn {
-      background: none; border: none; color: var(--accent);
-      font-size: .75rem; cursor: pointer; font-family: var(--font);
-      padding: 0; margin-top: .2rem; font-weight: 600;
-    }
-
-    .badge {
-      display: inline-block; padding: .18rem .55rem; border-radius: 999px;
-      font-size: .72rem; font-weight: 700;
-      background: var(--blue-lg); color: var(--blue); white-space: nowrap;
-    }
-
-    /* ── MODAL ── */
-    #modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.5); z-index: 500;
-      align-items: center; justify-content: center; padding: 1rem;
-    }
-    #modal-overlay.open { display: flex; }
-    .modal {
-      background: #fff; border-radius: 16px; width: min(700px, 100%);
-      max-height: 85vh; overflow-y: auto; padding: 2rem;
-      box-shadow: 0 32px 80px rgba(0,0,0,.2);
-    }
-    .modal-header {
-      display: flex; align-items: flex-start; gap: 1rem;
-      margin-bottom: 1.5rem; padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-header h2 { font-size: 1.15rem; flex: 1; }
-    .modal-close {
-      background: none; border: none; font-size: 1.4rem;
-      cursor: pointer; color: var(--muted); line-height: 1;
-    }
-    .modal-section { margin-bottom: 1.25rem; }
-    .modal-label {
-      font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
-      font-weight: 700; color: var(--muted); margin-bottom: .3rem;
-    }
-    .modal-value { font-size: .9rem; color: var(--text); line-height: 1.6; }
-    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    #loading-msg { text-align: center; padding: 3rem; color: var(--muted); font-size: .9rem; }
+    /* MODAL */
+    #modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:1rem; }
+    #modal-overlay.open { display:flex; }
+    .modal { background:#fff;border-radius:16px;width:min(720px,100%);max-height:88vh;overflow-y:auto;padding:2rem;box-shadow:0 32px 80px rgba(0,0,0,.2); }
+    .modal-header { display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border); }
+    .modal-header h2 { font-size:1.1rem;flex:1; }
+    .modal-close { background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted); }
+    .modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem; }
+    .modal-sec { margin-bottom:1rem; }
+    .mlabel { font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-bottom:.25rem; }
+    .mval { font-size:.88rem;line-height:1.6; }
+    .frase-box { background:var(--blue);border-radius:10px;padding:1rem 1.25rem;margin-top:.5rem; }
+    .frase-box .mlabel { color:rgba(255,255,255,.55); }
+    .frase-box .mval { color:#fff;font-style:italic;font-size:.95rem; }
   </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
 <div id="login-overlay">
   <div class="login-box">
     <h1>Dashboard MPA</h1>
     <p>Acceso restringido al equipo de la Escuela de Gobierno</p>
-    <input type="password" id="pwd-input" placeholder="Contraseña" autocomplete="current-password">
+    <input type="password" id="pwd-input" placeholder="Contraseña">
     <button id="pwd-btn">Ingresar</button>
     <div id="login-error"></div>
   </div>
 </div>
 
-<!-- ══ TOPBAR ══ -->
 <header>
-  <h1>📊 Dashboard · Postulantes MPA</h1>
+  <h1>Dashboard · Postulantes MPA</h1>
   <span id="total-badge">— candidatos</span>
   <button id="logout-btn">Cerrar sesión</button>
 </header>
 
-<!-- ══ MAIN ══ -->
 <main>
-  <!-- Gráficas -->
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Perfil dominante</h3><div class="chart-wrap"><canvas id="chart-perfil"></canvas></div></div>
-    <div class="chart-card"><h3>Sector</h3><div class="chart-wrap"><canvas id="chart-sector"></canvas></div></div>
-    <div class="chart-card"><h3>Años de experiencia</h3><div class="chart-wrap"><canvas id="chart-anos"></canvas></div></div>
-    <div class="chart-card"><h3>Rango de edad</h3><div class="chart-wrap"><canvas id="chart-edad"></canvas></div></div>
-    <div class="chart-card"><h3>Nivel de formación</h3><div class="chart-wrap"><canvas id="chart-formacion"></canvas></div></div>
+  <!-- FILTROS -->
+  <div class="filters-bar" id="filters-bar">
+    <div>
+      <label>Búsqueda</label>
+      <input type="search" id="f-search" placeholder="Nombre, email, cargo..." style="width:200px;">
+    </div>
+    <div>
+      <label>Perfil dominante</label>
+      <select id="f-perfil"><option value="">Todos</option></select>
+    </div>
+    <div>
+      <label>Sector</label>
+      <select id="f-sector"><option value="">Todos</option></select>
+    </div>
+    <div>
+      <label>Años de experiencia</label>
+      <select id="f-anos"><option value="">Todos</option></select>
+    </div>
+    <div>
+      <label>Edad</label>
+      <select id="f-edad"><option value="">Todos</option></select>
+    </div>
+    <div>
+      <label>Formación</label>
+      <select id="f-formacion"><option value="">Todos</option></select>
+    </div>
+    <div style="align-self:flex-end;">
+      <button id="btn-reset">Limpiar filtros</button>
+    </div>
   </div>
 
-  <!-- Tabla -->
-  <div class="section-header">
+  <!-- GRAFICAS -->
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Perfil dominante</h3><div class="chart-wrap"><canvas id="ch-perfil"></canvas></div></div>
+    <div class="chart-card"><h3>Sector</h3><div class="chart-wrap"><canvas id="ch-sector"></canvas></div></div>
+    <div class="chart-card"><h3>Años de experiencia</h3><div class="chart-wrap"><canvas id="ch-anos"></canvas></div></div>
+    <div class="chart-card"><h3>Rango de edad</h3><div class="chart-wrap"><canvas id="ch-edad"></canvas></div></div>
+    <div class="chart-card"><h3>Nivel de formación</h3><div class="chart-wrap"><canvas id="ch-formacion"></canvas></div></div>
+    <div class="chart-card"><h3>CV adjunto</h3><div class="chart-wrap"><canvas id="ch-cv"></canvas></div></div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="section-hdr">
     <h2>Candidatos</h2>
-    <input type="search" id="search-input" placeholder="Buscar por nombre, cargo...">
+    <span id="count-label" style="font-size:.82rem;color:var(--muted);"></span>
   </div>
   <div class="table-wrap">
-    <div id="loading-msg">Cargando datos…</div>
-    <table id="candidates-table" style="display:none;">
+    <div id="loading-msg">Cargando datos...</div>
+    <table id="tbl" style="display:none;">
       <thead>
         <tr>
           <th>Fecha</th>
@@ -213,225 +161,253 @@
           <th>Email</th>
           <th>Cargo</th>
           <th>Sector</th>
+          <th>Años exp.</th>
+          <th>Edad</th>
+          <th>Formación</th>
+          <th>Institución</th>
+          <th>Intereses</th>
           <th>Perfil</th>
           <th>Frase potente</th>
+          <th>CV</th>
         </tr>
       </thead>
-      <tbody id="table-body"></tbody>
+      <tbody id="tbody"></tbody>
     </table>
   </div>
 </main>
 
-<!-- ══ MODAL ══ -->
+<!-- MODAL -->
 <div id="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-nombre">—</h2>
-      <button class="modal-close" id="modal-close">✕</button>
+      <h2 id="m-nombre">—</h2>
+      <button class="modal-close" id="modal-close">&#x2715;</button>
     </div>
-    <div class="modal-grid" style="margin-bottom:1.25rem;">
-      <div><div class="modal-label">Email</div><div class="modal-value" id="m-email">—</div></div>
-      <div><div class="modal-label">Fecha</div><div class="modal-value" id="m-fecha">—</div></div>
-      <div><div class="modal-label">Cargo</div><div class="modal-value" id="m-cargo">—</div></div>
-      <div><div class="modal-label">Sector</div><div class="modal-value" id="m-sector">—</div></div>
-      <div><div class="modal-label">Años exp.</div><div class="modal-value" id="m-anos">—</div></div>
-      <div><div class="modal-label">Edad</div><div class="modal-value" id="m-edad">—</div></div>
-      <div><div class="modal-label">Formación</div><div class="modal-value" id="m-formacion">—</div></div>
-      <div><div class="modal-label">Institución</div><div class="modal-value" id="m-institucion">—</div></div>
+    <div class="modal-grid">
+      <div><div class="mlabel">Email</div><div class="mval" id="m-email">—</div></div>
+      <div><div class="mlabel">Fecha</div><div class="mval" id="m-fecha">—</div></div>
+      <div><div class="mlabel">Cargo</div><div class="mval" id="m-cargo">—</div></div>
+      <div><div class="mlabel">Sector</div><div class="mval" id="m-sector">—</div></div>
+      <div><div class="mlabel">Años de experiencia</div><div class="mval" id="m-anos">—</div></div>
+      <div><div class="mlabel">Edad</div><div class="mval" id="m-edad">—</div></div>
+      <div><div class="mlabel">Formación</div><div class="mval" id="m-formacion">—</div></div>
+      <div><div class="mlabel">Institución</div><div class="mval" id="m-inst">—</div></div>
     </div>
-    <div class="modal-section"><div class="modal-label">Perfil dominante</div><div class="modal-value" id="m-perfil">—</div></div>
-    <div class="modal-section"><div class="modal-label">Temas de interés</div><div class="modal-value" id="m-intereses">—</div></div>
-    <div class="modal-section"><div class="modal-label">Experiencia y logros</div><div class="modal-value" id="m-experiencia">—</div></div>
-    <div class="modal-section"><div class="modal-label">Motivación</div><div class="modal-value" id="m-motivacion">—</div></div>
-    <div class="modal-section"><div class="modal-label">Conexión con el MPA</div><div class="modal-value" id="m-conexion">—</div></div>
-    <div class="modal-section"><div class="modal-label">Competencias</div><div class="modal-value" id="m-competencias">—</div></div>
-    <div class="modal-section"><div class="modal-label">Líneas académicas</div><div class="modal-value" id="m-lineas">—</div></div>
-    <div class="modal-section"><div class="modal-label">Proyección</div><div class="modal-value" id="m-proyeccion">—</div></div>
-    <div class="modal-section" style="background:var(--blue);border-radius:10px;padding:1rem 1.25rem;">
-      <div class="modal-label" style="color:rgba(255,255,255,.6);">Frase potente</div>
-      <div class="modal-value" style="color:#fff;font-style:italic;font-size:1rem;" id="m-frase">—</div>
+    <div class="modal-sec"><div class="mlabel">Perfil dominante</div><div class="mval" id="m-perfil">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Temas de interés</div><div class="mval" id="m-intereses">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Experiencia y logros</div><div class="mval" id="m-exp">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Motivación</div><div class="mval" id="m-mot">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Conexión con el MPA</div><div class="mval" id="m-con">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Competencias</div><div class="mval" id="m-comp">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Líneas académicas</div><div class="mval" id="m-lin">—</div></div>
+    <div class="modal-sec"><div class="mlabel">Proyección</div><div class="mval" id="m-proy">—</div></div>
+    <div class="frase-box">
+      <div class="mlabel">Frase potente</div>
+      <div class="mval" id="m-frase">—</div>
     </div>
-    <div class="modal-section" style="margin-top:1rem;">
-      <div class="modal-label">CV</div>
-      <div class="modal-value" id="m-cv">—</div>
+    <div class="modal-sec" style="margin-top:1rem;">
+      <div class="mlabel">Hoja de vida</div>
+      <div class="mval" id="m-cv">—</div>
     </div>
   </div>
 </div>
 
 <script>
-  /* ── CONFIG ─────────────────────────────────────────────────────── */
   const SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
-  const DASHBOARD_PWD = 'MPA2026';   // ← cambia esta contraseña
+  const DASHBOARD_PWD = 'MPA2026';
+  const BUCKET        = 'hojas-de-vida';
+  const COLORS        = ['#00135B','#3D5AFE','#7986CB','#9FA8DA','#536DFE','#C5CAE9','#304FFE','#8C9EFF'];
 
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  /* ── PALETA ─────────────────────────────────────────────────────── */
-  const COLORS = ['#00135B','#3D5AFE','#7986CB','#9FA8DA','#C5CAE9','#E8EAF6','#536DFE','#304FFE'];
-
-  /* ── LOGIN ──────────────────────────────────────────────────────── */
-  const overlay  = document.getElementById('login-overlay');
-  const pwdInput = document.getElementById('pwd-input');
-  const pwdBtn   = document.getElementById('pwd-btn');
-  const loginErr = document.getElementById('login-error');
+  /* ── LOGIN ── */
+  const overlay = document.getElementById('login-overlay');
+  document.getElementById('pwd-btn').addEventListener('click', tryLogin);
+  document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+  document.getElementById('logout-btn').addEventListener('click', () => { overlay.style.display = 'flex'; });
 
   function tryLogin() {
-    if (pwdInput.value === DASHBOARD_PWD) {
+    if (document.getElementById('pwd-input').value === DASHBOARD_PWD) {
       overlay.style.display = 'none';
       loadData();
     } else {
-      loginErr.textContent = 'Contraseña incorrecta.';
-      pwdInput.value = '';
-      pwdInput.focus();
+      document.getElementById('login-error').textContent = 'Contraseña incorrecta.';
+      document.getElementById('pwd-input').value = '';
     }
   }
-  pwdBtn.addEventListener('click', tryLogin);
-  pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    overlay.style.display = 'flex';
-    pwdInput.value = '';
-  });
-
-  /* ── DATA ───────────────────────────────────────────────────────── */
-  let allRows = [];
+  /* ── DATA ── */
+  let allRows = [], charts = {};
 
   async function loadData() {
-    const { data, error } = await db
-      .from('postulantes')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      document.getElementById('loading-msg').textContent = 'Error cargando datos: ' + error.message;
-      return;
-    }
-
+    const { data, error } = await db.from('postulantes').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('loading-msg').textContent = 'Error: ' + error.message; return; }
     allRows = data || [];
-    document.getElementById('total-badge').textContent = allRows.length + ' candidatos';
     document.getElementById('loading-msg').style.display = 'none';
-    document.getElementById('candidates-table').style.display = 'table';
-
-    buildCharts(allRows);
-    renderTable(allRows);
+    document.getElementById('tbl').style.display = 'table';
+    populateFilters(allRows);
+    applyFilters();
   }
 
-  /* ── CHARTS ─────────────────────────────────────────────────────── */
+  /* ── FILTERS ── */
+  function populateFilters(rows) {
+    const fields = { 'f-perfil': 'perfil_dominante', 'f-sector': 'sector', 'f-anos': 'anos_exp', 'f-edad': 'edad', 'f-formacion': 'formacion' };
+    Object.entries(fields).forEach(([selId, field]) => {
+      const sel = document.getElementById(selId);
+      const vals = [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
+      vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+    });
+    ['f-perfil','f-sector','f-anos','f-edad','f-formacion','f-search'].forEach(id => {
+      document.getElementById(id).addEventListener('input', applyFilters);
+    });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      ['f-perfil','f-sector','f-anos','f-edad','f-formacion'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-search').value = '';
+      applyFilters();
+    });
+  }
+
+  function applyFilters() {
+    const q    = document.getElementById('f-search').value.toLowerCase();
+    const perfil  = document.getElementById('f-perfil').value;
+    const sector  = document.getElementById('f-sector').value;
+    const anos    = document.getElementById('f-anos').value;
+    const edad    = document.getElementById('f-edad').value;
+    const form    = document.getElementById('f-formacion').value;
+
+    const filtered = allRows.filter(r => {
+      if (perfil && r.perfil_dominante !== perfil) return false;
+      if (sector && r.sector           !== sector) return false;
+      if (anos   && r.anos_exp         !== anos  ) return false;
+      if (edad   && r.edad             !== edad  ) return false;
+      if (form   && r.formacion        !== form  ) return false;
+      if (q && !['nombre','email','cargo','sector','intereses'].some(f => (r[f]||'').toLowerCase().includes(q))) return false;
+      return true;
+    });
+
+    document.getElementById('total-badge').textContent = filtered.length + ' candidatos';
+    document.getElementById('count-label').textContent = filtered.length === allRows.length
+      ? `${allRows.length} registros`
+      : `${filtered.length} de ${allRows.length} registros`;
+
+    buildCharts(filtered);
+    renderTable(filtered);
+  }
+
+  /* ── CHARTS ── */
   function dist(rows, field) {
     const counts = {};
-    rows.forEach(r => {
-      const v = r[field] || 'Sin dato';
-      counts[v] = (counts[v] || 0) + 1;
-    });
+    rows.forEach(r => { const v = r[field] || 'Sin dato'; counts[v] = (counts[v]||0) + 1; });
     const total = rows.length || 1;
-    const labels = Object.keys(counts);
-    const data   = labels.map(l => Math.round(counts[l] / total * 100));
-    return { labels, data };
+    const labels = Object.keys(counts).sort((a,b) => counts[b]-counts[a]);
+    return { labels, data: labels.map(l => Math.round(counts[l]/total*100)) };
   }
 
-  function makeChart(id, field, rows) {
-    const { labels, data } = dist(rows, field);
-    new Chart(document.getElementById(id), {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{ data, backgroundColor: COLORS.slice(0, labels.length), borderWidth: 2, borderColor: '#fff' }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'right', labels: { font: { size: 11, family: "'Libre Franklin', sans-serif" }, boxWidth: 12, padding: 8 } },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` } }
+  function makeOrUpdateChart(id, field, rows, isCustom) {
+    const { labels, data } = isCustom ? isCustom(rows) : dist(rows, field);
+    if (charts[id]) {
+      charts[id].data.labels = labels;
+      charts[id].data.datasets[0].data = data;
+      charts[id].data.datasets[0].backgroundColor = COLORS.slice(0, labels.length);
+      charts[id].update();
+    } else {
+      charts[id] = new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: COLORS.slice(0,labels.length), borderWidth: 2, borderColor: '#fff' }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { font: { size: 10, family: "'Libre Franklin',sans-serif" }, boxWidth: 11, padding: 6 } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` } }
+          }
         }
-      }
-    });
+      });
+    }
+  }
+
+  function cvDist(rows) {
+    const yes = rows.filter(r => r.cv_path).length;
+    const no  = rows.length - yes;
+    return { labels: ['Con CV', 'Sin CV'], data: [Math.round(yes/(rows.length||1)*100), Math.round(no/(rows.length||1)*100)] };
   }
 
   function buildCharts(rows) {
-    makeChart('chart-perfil',   'perfil_dominante', rows);
-    makeChart('chart-sector',   'sector',           rows);
-    makeChart('chart-anos',     'anos_exp',         rows);
-    makeChart('chart-edad',     'edad',             rows);
-    makeChart('chart-formacion','formacion',        rows);
+    makeOrUpdateChart('ch-perfil',   'perfil_dominante', rows);
+    makeOrUpdateChart('ch-sector',   'sector',           rows);
+    makeOrUpdateChart('ch-anos',     'anos_exp',         rows);
+    makeOrUpdateChart('ch-edad',     'edad',             rows);
+    makeOrUpdateChart('ch-formacion','formacion',        rows);
+    makeOrUpdateChart('ch-cv',       null,               rows, cvDist);
   }
 
-  /* ── TABLE ──────────────────────────────────────────────────────── */
-  function fmt(val, max = 80) {
-    if (!val) return '<span style="color:#aaa">—</span>';
-    const escaped = val.replace(/</g, '&lt;');
-    if (escaped.length <= max) return escaped;
-    return `<span class="cell-truncate">${escaped.substring(0, max)}…</span>`;
+  /* ── TABLE ── */
+  function clip(val, len = 60) {
+    if (!val) return '<span style="color:#bbb">—</span>';
+    const s = String(val);
+    return s.length <= len ? s : `<span class="cell-clip" title="${s.replace(/"/g,'&quot;')}">${s.substring(0,len)}…</span>`;
   }
 
   function renderTable(rows) {
-    const tbody = document.getElementById('table-body');
+    const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
     rows.forEach(r => {
       const tr = document.createElement('tr');
       const fecha = r.created_at
-        ? new Date(r.created_at).toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' })
+        ? new Date(r.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'})
         : '—';
       tr.innerHTML = `
-        <td style="white-space:nowrap;color:var(--muted);font-size:.8rem;">${fecha}</td>
-        <td><strong>${r.nombre || '—'}</strong></td>
-        <td style="color:var(--muted)">${r.email || '—'}</td>
-        <td>${fmt(r.cargo, 30)}</td>
-        <td style="font-size:.8rem">${fmt(r.sector, 35)}</td>
-        <td><span class="badge">${r.perfil_dominante || '—'}</span></td>
-        <td style="max-width:220px">${fmt(r.frase_potente, 70)}</td>`;
+        <td style="white-space:nowrap;color:var(--muted);font-size:.78rem;">${fecha}</td>
+        <td><strong>${r.nombre||'—'}</strong></td>
+        <td style="color:var(--muted)">${r.email||'—'}</td>
+        <td>${clip(r.cargo,30)}</td>
+        <td style="font-size:.78rem">${clip(r.sector,35)}</td>
+        <td style="font-size:.78rem">${r.anos_exp||'—'}</td>
+        <td style="font-size:.78rem">${r.edad||'—'}</td>
+        <td style="font-size:.78rem">${r.formacion||'—'}</td>
+        <td style="font-size:.78rem">${clip(r.institucion,25)}</td>
+        <td>${clip(r.intereses,40)}</td>
+        <td><span class="badge">${r.perfil_dominante||'—'}</span></td>
+        <td>${clip(r.frase_potente,55)}</td>
+        <td id="cv-${r.id}"><span style="color:#bbb;font-size:.78rem">—</span></td>`;
       tr.addEventListener('click', () => openModal(r));
       tbody.appendChild(tr);
+      if (r.cv_path) loadCvLink(r.id, r.cv_path);
     });
   }
 
-  /* ── SEARCH ─────────────────────────────────────────────────────── */
-  document.getElementById('search-input').addEventListener('input', e => {
-    const q = e.target.value.toLowerCase();
-    const filtered = allRows.filter(r =>
-      (r.nombre || '').toLowerCase().includes(q) ||
-      (r.cargo  || '').toLowerCase().includes(q) ||
-      (r.email  || '').toLowerCase().includes(q) ||
-      (r.sector || '').toLowerCase().includes(q)
-    );
-    renderTable(filtered);
-  });
-
-  /* ── MODAL ──────────────────────────────────────────────────────── */
-  function set(id, val) {
-    document.getElementById(id).textContent = val || '—';
+  async function loadCvLink(id, path) {
+    const { data } = await db.storage.from(BUCKET).createSignedUrl(path, 3600);
+    const cell = document.getElementById('cv-'+id);
+    if (cell && data?.signedUrl) {
+      cell.innerHTML = `<a class="cv-link" href="${data.signedUrl}" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>`;
+    }
   }
 
-  function openModal(r) {
-    const fecha = r.created_at
-      ? new Date(r.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota' })
-      : '—';
+  /* ── MODAL ── */
+  function s(id, val) { document.getElementById(id).textContent = val || '—'; }
 
-    document.getElementById('modal-nombre').textContent = r.nombre || 'Sin nombre';
-    set('m-email',       r.email);
-    set('m-fecha',       fecha);
-    set('m-cargo',       r.cargo);
-    set('m-sector',      r.sector);
-    set('m-anos',        r.anos_exp);
-    set('m-edad',        r.edad);
-    set('m-formacion',   r.formacion);
-    set('m-institucion', r.institucion);
-    set('m-perfil',      r.perfil_dominante);
-    set('m-intereses',   r.intereses);
-    set('m-experiencia', r.experiencia);
-    set('m-motivacion',  r.motivacion);
-    set('m-conexion',    r.conexion);
-    set('m-competencias',r.competencias);
-    set('m-lineas',      r.lineas);
-    set('m-proyeccion',  r.proyeccion);
-    set('m-frase',       r.frase_potente);
+  async function openModal(r) {
+    const fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-CO',{timeZone:'America/Bogota'}) : '—';
+    document.getElementById('m-nombre').textContent = r.nombre || 'Sin nombre';
+    s('m-email', r.email); s('m-fecha', fecha); s('m-cargo', r.cargo);
+    s('m-sector', r.sector); s('m-anos', r.anos_exp); s('m-edad', r.edad);
+    s('m-formacion', r.formacion); s('m-inst', r.institucion);
+    s('m-perfil', r.perfil_dominante); s('m-intereses', r.intereses);
+    s('m-exp', r.experiencia); s('m-mot', r.motivacion);
+    s('m-con', r.conexion); s('m-comp', r.competencias);
+    s('m-lin', r.lineas); s('m-proy', r.proyeccion); s('m-frase', r.frase_potente);
 
     const cvEl = document.getElementById('m-cv');
     if (r.cv_path) {
-      cvEl.innerHTML = `<a href="${SUPABASE_URL}/storage/v1/object/public/hojas-de-vida/${r.cv_path}" target="_blank" style="color:var(--accent)">Ver PDF ↗</a>`;
+      cvEl.innerHTML = 'Cargando enlace...';
+      const { data } = await db.storage.from(BUCKET).createSignedUrl(r.cv_path, 3600);
+      cvEl.innerHTML = data?.signedUrl
+        ? `<a class="cv-link" href="${data.signedUrl}" target="_blank">Descargar PDF (expira en 1 hora)</a>`
+        : 'No se pudo generar enlace';
     } else {
       cvEl.textContent = 'No adjuntó CV';
     }
-
     document.getElementById('modal-overlay').classList.add('open');
   }
 
