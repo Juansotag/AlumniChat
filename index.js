@@ -188,23 +188,27 @@ async function logToSupabase(env, body, result) {
   }
   try {
     const row = {
-      nombre:   body.cargo  || "Aspirante sin cargo",
-      email:    body.email  || null,
-      programa: "MPA",
-      cv_path:  body.cvPath || null,
-      metadata: {
-        cargo:           body.cargo       || null,
-        sector:          body.sector      || null,
-        anos:            body.anos        || null,
-        edad:            body.edad        || null,
-        formacion:       body.formacion   || null,
-        institucion:     body.institucion || null,
-        intereses:       body.intereses   || null,
-        experiencia:     (body.experiencia || "").substring(0, 500),
-        motivacion:      (body.motivacion  || "").substring(0, 500),
-        perfil_dominante:(result.perfil_dominante || []).join(", "),
-        frase_potente:   result.frase_potente || "",
-      },
+      // Datos personales
+      nombre:           body.nombre      || null,
+      email:            body.email       || null,
+      // Datos del formulario
+      cargo:            body.cargo       || null,
+      sector:           body.sector      || null,
+      anos_exp:         body.anos        || null,
+      edad:             body.edad        || null,
+      formacion:        body.formacion   || null,
+      institucion:      body.institucion || null,
+      intereses:        body.intereses   || null,
+      experiencia:      body.experiencia || null,
+      motivacion:       body.motivacion  || null,
+      cv_path:          body.cvPath      || null,
+      // Respuesta de la IA
+      perfil_dominante: (result.perfil_dominante || []).join(", "),
+      conexion:         result.conexion      || null,
+      competencias:     result.competencias  || null,
+      lineas:           result.lineas        || null,
+      proyeccion:       result.proyeccion    || null,
+      frase_potente:    result.frase_potente || null,
     };
 
     const res = await fetch(

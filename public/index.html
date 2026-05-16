@@ -368,6 +368,18 @@
 
       <form id="match-form">
 
+        <!-- Fila 0: Nombre + Email -->
+        <div class="form-two-col">
+          <div class="field">
+            <label for="f-nombre">Nombre completo</label>
+            <input type="text" id="f-nombre" placeholder="Ej: María Fernanda Ospina" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="f-email">Correo electrónico</label>
+            <input type="email" id="f-email" placeholder="Ej: mariaf@correo.com" autocomplete="email">
+          </div>
+        </div>
+
         <!-- Fila 1: Cargo + Sector -->
         <div class="form-two-col">
           <div class="field">
@@ -693,6 +705,8 @@
       btnText.textContent = 'Analizando tu perfil...';
 
       const payload = {
+        nombre:     document.getElementById('f-nombre').value.trim() || null,
+        email:      document.getElementById('f-email').value.trim()  || null,
         cargo,
         sector:     document.getElementById('f-sector').value,
         anos:       document.getElementById('f-anos').value,
@@ -703,7 +717,7 @@
         experiencia,
         motivacion,
         cvTexto: cvTexto || undefined,
-        cvPath:  cvPath  || undefined,   // ruta en Supabase Storage
+        cvPath:  cvPath  || undefined,
       };
 
       console.log('[SUBMIT] Payload:', {
