@@ -15,6 +15,9 @@
     href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
     rel="stylesheet">
 
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <!-- Sistema de diseño institucional -->
   <link rel="stylesheet" href="styles.css">
 
@@ -554,6 +557,11 @@
   </div>
 
   <script>
+    /* ── Supabase client ────────────────────────────────────────── */
+    const SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
     const form = document.getElementById('match-form');
     const btnSubmit = document.getElementById('btn-submit');
     const btnText = document.getElementById('btn-text');
@@ -563,7 +571,7 @@
 
     /* ── Drag & drop + extracción de texto de PDF con PDF.js ────── */
     let cvTexto = "";
-    let cvBase64 = "";
+    let cvFile  = null;   // archivo original para subir a Supabase
     const fileInput = document.getElementById('f-cv');
     const fileArea = document.getElementById('file-upload-area');
     const fileNameDisplay = document.getElementById('file-name-display');
@@ -589,21 +597,15 @@
       fileProcessing.style.display = 'flex';
       fileNameDisplay.style.display = 'none';
       cvTexto = '';
-      cvBase64 = '';
+      cvFile  = null;
 
       try {
         console.log('[CV] Iniciando lectura del archivo:', file.name, `(${(file.size/1024).toFixed(1)} KB)`);
 
-        // Paso 1: leer como base64 ANTES de que PDF.js detache el ArrayBuffer
-        cvBase64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-        console.log('[CV] Base64 capturado, longitud:', cvBase64.length);
+        // Guardar referencia al archivo para subirlo a Supabase al enviar
+        cvFile = file;
 
-        // Paso 2: extraer texto con PDF.js (usa un ArrayBuffer fresco)
+        // Extraer texto con PDF.js
         const arrayBuffer = await file.arrayBuffer();
         const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
         pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -619,20 +621,41 @@
           pages.push(content.items.map(item => item.str).join(' '));
         }
         cvTexto = pages.join('\n\n');
-        console.log('[CV] Texto extraído, caracteres:', cvTexto.length, '| Primeros 100:', cvTexto.substring(0, 100));
+        console.log('[CV] Texto extraído, caracteres:', cvTexto.length);
 
         if (!cvTexto.trim()) {
-          console.warn('[CV] Texto vacío — el PDF puede ser imagen escaneada. Se guardará el PDF igual.');
-          // NO hacemos return: el PDF igual se guarda en Drive vía cvBase64
+          console.warn('[CV] Texto vacío — PDF posiblemente escaneado. Se guardará igual.');
         }
 
         fileNameDisplay.textContent = '✓ ' + file.name + ' (' + pdf.numPages + ' pág.)';
         fileNameDisplay.style.display = 'block';
       } catch (err) {
-        cvBase64 = ''; // limpiar si falló
+        console.error('[CV] Error procesando PDF:', err);
+        cvFile  = null;
         cvTexto = '';
       } finally {
         fileProcessing.style.display = 'none';
+      }
+    }
+
+    /* ── Subir PDF a Supabase Storage ───────────────────────────── */
+    async function uploadCvToSupabase(file, cargo) {
+      if (!file) return null;
+      try {
+        const safeCargo  = (cargo || 'aspirante').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40);
+        const fileName   = `CV_${safeCargo}_${Date.now()}.pdf`;
+        const { data, error } = await supabase.storage
+          .from('hojas-de-vida')
+          .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
+        if (error) {
+          console.error('[Supabase Storage] Error:', error.message);
+          return null;
+        }
+        console.log('[Supabase Storage] PDF guardado en:', data.path);
+        return data.path;
+      } catch (err) {
+        console.error('[Supabase Storage] Excepción:', err);
+        return null;
       }
     }
 
@@ -641,9 +664,10 @@
       e.preventDefault();
       errorMsg.style.display = 'none';
 
+      const cargo      = document.getElementById('f-cargo').value.trim();
       const experiencia = document.getElementById('f-experiencia').value.trim();
       const motivacion = document.getElementById('f-motivacion').value.trim();
-      const consent = document.getElementById('f-consent').checked;
+      const consent    = document.getElementById('f-consent').checked;
 
       if (!experiencia && !motivacion) {
         showError('Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.');
@@ -656,28 +680,36 @@
 
       btnSubmit.disabled = true;
       spinner.style.display = 'block';
-      btnText.textContent = 'Analizando tu perfil...';
       resultsArea.style.display = 'none';
 
+      // Paso 1: subir PDF a Supabase (si hay uno)
+      let cvPath = null;
+      if (cvFile) {
+        btnText.textContent = 'Guardando hoja de vida...';
+        cvPath = await uploadCvToSupabase(cvFile, cargo);
+      }
+
+      // Paso 2: llamar al Worker con los metadatos
+      btnText.textContent = 'Analizando tu perfil...';
+
       const payload = {
-        cargo: document.getElementById('f-cargo').value,
-        sector: document.getElementById('f-sector').value,
-        anos: document.getElementById('f-anos').value,
-        edad: document.getElementById('f-edad').value,
-        formacion: document.getElementById('f-formacion').value,
+        cargo,
+        sector:     document.getElementById('f-sector').value,
+        anos:       document.getElementById('f-anos').value,
+        edad:       document.getElementById('f-edad').value,
+        formacion:  document.getElementById('f-formacion').value,
         institucion: document.getElementById('f-institucion').value,
-        intereses: document.getElementById('f-intereses').value,
+        intereses:  document.getElementById('f-intereses').value,
         experiencia,
         motivacion,
         cvTexto: cvTexto || undefined,
-        cvBase64: cvBase64 || undefined,
+        cvPath:  cvPath  || undefined,   // ruta en Supabase Storage
       };
 
       console.log('[SUBMIT] Payload:', {
         cargo: payload.cargo,
         cvTextoLen: (payload.cvTexto || '').length,
-        cvBase64Len: (payload.cvBase64 || '').length,
-        tienePDF: !!payload.cvBase64,
+        cvPath: payload.cvPath,
       });
 
       try {

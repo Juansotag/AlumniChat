@@ -3,10 +3,11 @@
  * Backend proxy que protege la API key de Anthropic.
  *
  * SECRETS REQUERIDOS EN CLOUDFLARE (Settings → Variables → Secrets):
- *   ANTHROPIC_API_KEY       — sk-ant-...
- *   GOOGLE_SHEET_ID         — ID del Google Sheet (parte de la URL)
- *   GOOGLE_DRIVE_FOLDER_ID  — ID de la carpeta de Google Drive
- *   GOOGLE_SERVICE_ACCOUNT  — JSON completo del service account (stringificado)
+ *   ANTHROPIC_API_KEY    — sk-ant-...
+ *   SUPABASE_URL         — https://tqtiptguuqtxtkizxrko.supabase.co
+ *   SUPABASE_SECRET_KEY  — sb_secret_... (nueva nomenclatura Supabase,
+ *                          reemplaza la antigua service_role key;
+ *                          bypasea RLS — NUNCA exponer en el cliente)
  */
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
@@ -117,7 +118,6 @@ FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdow
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 function corsHeaders(origin) {
-  /* Ajusta los dominios permitidos según tu sitio */
   const allowed = [
     "https://mpaescueladegobierno.com.co",
     "https://www.mpaescueladegobierno.com.co",
@@ -180,163 +180,55 @@ function buildUserMessage(body) {
     .join("\n");
 }
 
-/* ── Google Sheets: registrar metadatos ─────────────────────────────────── */
-const SHEET_HEADERS = [
-  "Fecha", "Cargo", "Sector", "Anos Exp.", "Edad",
-  "Formacion", "Institucion", "Intereses",
-  "Experiencia (resumen)", "Motivacion (resumen)",
-  "Perfil Dominante", "Frase Potente", "CV Adjunto"
-];
-
-async function logToSheet(env, body, result) {
-  try {
-    const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
-    const token = await getGoogleAccessToken(sa);
-    const sheetId = env.GOOGLE_SHEET_ID;
-    const sheetName = encodeURIComponent("Hoja 1");
-    const auth = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-
-    // Verificar si A1 ya tiene encabezados; si no, escribirlos
-    const checkRes = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1`,
-      { headers: auth }
-    );
-    const checkData = await checkRes.json();
-    if (!checkData.values || checkData.values.length === 0) {
-      await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1?valueInputOption=USER_ENTERED`,
-        { method: "PUT", headers: auth, body: JSON.stringify({ values: [SHEET_HEADERS] }) }
-      );
-    }
-
-    const now = new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
-    const row = [
-      now,
-      body.cargo || "",
-      body.sector || "",
-      body.anos || "",
-      body.edad || "",
-      body.formacion || "",
-      body.institucion || "",
-      body.intereses || "",
-      (body.experiencia || "").substring(0, 300),
-      (body.motivacion || "").substring(0, 300),
-      (result.perfil_dominante || []).join(", "),
-      result.frase_potente || "",
-      body.cvBase64 ? "Si" : "No",
-    ];
-
-    const appendRes = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A:M:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-      { method: "POST", headers: auth, body: JSON.stringify({ values: [row] }) }
-    );
-    if (!appendRes.ok) {
-      console.error("Sheets append error:", appendRes.status, await appendRes.text());
-    }
-  } catch (e) {
-    console.error("Error logging to sheet:", e.message);
-  }
-}
-
-/* ── Google Drive: subir PDF original (base64 → binario → Drive) ─────────── */
-async function uploadCvToDrive(env, body) {
-  console.log("[Drive] Iniciando. cvBase64 presente:", !!body.cvBase64, "| folderId presente:", !!env.GOOGLE_DRIVE_FOLDER_ID);
-  if (!body.cvBase64 || !env.GOOGLE_DRIVE_FOLDER_ID) {
-    console.warn("[Drive] Saliendo temprano: falta cvBase64 o GOOGLE_DRIVE_FOLDER_ID");
+/* ── Supabase: registrar metadatos del postulante ────────────────────────── */
+async function logToSupabase(env, body, result) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_SECRET_KEY) {
+    console.warn("[Supabase] Faltan secrets SUPABASE_URL o SUPABASE_SECRET_KEY");
     return;
   }
   try {
-    const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT);
-    const token = await getGoogleAccessToken(sa);
-    console.log("[Drive] Token obtenido:", token ? "OK" : "FALLO");
-    const folderId = env.GOOGLE_DRIVE_FOLDER_ID;
+    const row = {
+      nombre:   body.cargo  || "Aspirante sin cargo",
+      email:    body.email  || null,
+      programa: "MPA",
+      cv_path:  body.cvPath || null,
+      metadata: {
+        cargo:           body.cargo       || null,
+        sector:          body.sector      || null,
+        anos:            body.anos        || null,
+        edad:            body.edad        || null,
+        formacion:       body.formacion   || null,
+        institucion:     body.institucion || null,
+        intereses:       body.intereses   || null,
+        experiencia:     (body.experiencia || "").substring(0, 500),
+        motivacion:      (body.motivacion  || "").substring(0, 500),
+        perfil_dominante:(result.perfil_dominante || []).join(", "),
+        frase_potente:   result.frase_potente || "",
+      },
+    };
 
-    // Decodificar base64 → Uint8Array (PDF binario real)
-    const binaryStr = atob(body.cvBase64);
-    const pdfBytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      pdfBytes[i] = binaryStr.charCodeAt(i);
-    }
-    console.log("[Drive] PDF decodificado, bytes:", pdfBytes.length);
-
-    const fileName = `CV_${(body.cargo || "aspirante").replace(/\s+/g, "_")}_${Date.now()}.pdf`;
-    const metaJson = JSON.stringify({ name: fileName, parents: [folderId], mimeType: "application/pdf" });
-    const boundary = "mpa_cv_bound";
-
-    // Construir multipart: metadatos JSON + PDF binario en un solo POST
-    const enc = new TextEncoder();
-    const head = enc.encode(
-      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metaJson}\r\n--${boundary}\r\nContent-Type: application/pdf\r\n\r\n`
-    );
-    const tail = enc.encode(`\r\n--${boundary}--`);
-
-    const combined = new Uint8Array(head.length + pdfBytes.length + tail.length);
-    combined.set(head, 0);
-    combined.set(pdfBytes, head.length);
-    combined.set(tail, head.length + pdfBytes.length);
-    console.log("[Drive] Multipart construido, total bytes:", combined.length);
-
-    const driveRes = await fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    const res = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/postulantes`,
       {
-        method: "POST",
+        method:  "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": `multipart/related; boundary=${boundary}`,
+          "Content-Type":  "application/json",
+          "apikey":        env.SUPABASE_SECRET_KEY,
+          "Authorization": `Bearer ${env.SUPABASE_SECRET_KEY}`,
+          "Prefer":        "return=minimal",
         },
-        body: combined,
+        body: JSON.stringify(row),
       }
     );
 
-    const driveBody = await driveRes.text();
-    if (!driveRes.ok) {
-      console.error("[Drive] Error HTTP:", driveRes.status, driveBody);
+    if (!res.ok) {
+      console.error("[Supabase] Error HTTP:", res.status, await res.text());
     } else {
-      console.log("[Drive] Subida exitosa:", driveBody);
+      console.log("[Supabase] Postulante guardado correctamente.");
     }
   } catch (e) {
-    console.error("[Drive] Excepción:", e.message);
+    console.error("[Supabase] Excepción:", e.message);
   }
-}
-
-/* ── JWT / OAuth2 para Google APIs ──────────────────────────────────────── */
-async function getGoogleAccessToken(sa) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-  const claim = btoa(JSON.stringify({
-    iss: sa.client_email,
-    scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  })).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-
-  const toSign = `${header}.${claim}`;
-  const key = await importRsaKey(sa.private_key);
-  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(toSign));
-  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-  const jwt = `${toSign}.${sigB64}`;
-
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
-  });
-  const { access_token } = await res.json();
-  return access_token;
-}
-
-async function importRsaKey(pem) {
-  const pemBody = pem
-    .replace(/-----BEGIN PRIVATE KEY-----/, "")
-    .replace(/-----END PRIVATE KEY-----/, "")
-    .replace(/\n/g, "");
-  const der = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
-  return crypto.subtle.importKey(
-    "pkcs8", der.buffer,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false, ["sign"]
-  );
 }
 
 /* ── Handler principal ───────────────────────────────────────────────────── */
@@ -417,19 +309,9 @@ export default {
       );
     }
 
-    // Guardar en Google Sheets y Drive — ctx.waitUntil mantiene el Worker
-    // vivo hasta que terminen estas llamadas, sin bloquear la respuesta.
-    console.log("[Worker] body.cvBase64 presente:", !!body.cvBase64, "| longitud:", body.cvBase64?.length ?? 0);
-    console.log("[Worker] GOOGLE_DRIVE_FOLDER_ID presente:", !!env.GOOGLE_DRIVE_FOLDER_ID);
-    console.log("[Worker] GOOGLE_SHEET_ID presente:", !!env.GOOGLE_SHEET_ID);
-    if (env.GOOGLE_SERVICE_ACCOUNT && env.GOOGLE_SHEET_ID) {
-      ctx.waitUntil(
-        Promise.all([
-          logToSheet(env, body, parsed),
-          uploadCvToDrive(env, body),
-        ])
-      );
-    }
+    // Guardar en Supabase — ctx.waitUntil mantiene el Worker vivo
+    // hasta que termine la llamada, sin bloquear la respuesta al cliente.
+    ctx.waitUntil(logToSupabase(env, body, parsed));
 
     return jsonResponse({ ok: true, result: parsed }, 200, origin);
   },
