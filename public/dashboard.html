@@ -377,11 +377,9 @@
   }
 
   async function loadCvLink(id, path) {
-    const { data } = await db.storage.from(BUCKET).createSignedUrl(path, 3600);
+    const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
     const cell = document.getElementById('cv-'+id);
-    if (cell && data?.signedUrl) {
-      cell.innerHTML = `<a class="cv-link" href="${data.signedUrl}" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>`;
-    }
+    if (cell) cell.innerHTML = `<a class="cv-link" href="${url}" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>`;
   }
 
   /* ── MODAL ── */
@@ -400,11 +398,8 @@
 
     const cvEl = document.getElementById('m-cv');
     if (r.cv_path) {
-      cvEl.innerHTML = 'Cargando enlace...';
-      const { data } = await db.storage.from(BUCKET).createSignedUrl(r.cv_path, 3600);
-      cvEl.innerHTML = data?.signedUrl
-        ? `<a class="cv-link" href="${data.signedUrl}" target="_blank">Descargar PDF (expira en 1 hora)</a>`
-        : 'No se pudo generar enlace';
+      const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${r.cv_path}`;
+      cvEl.innerHTML = `<a class="cv-link" href="${url}" target="_blank">Descargar PDF</a>`;
     } else {
       cvEl.textContent = 'No adjuntó CV';
     }
