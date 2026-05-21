@@ -223,7 +223,9 @@ async function logToSupabase(env, body, result, usage) {
       motivacion: body.motivacion || null,
       cv_path: body.cvPath || null,
       // Respuesta de la IA
-      perfil_dominante: (result.perfil_dominante || []).join(", "),
+      perfil_dominante: Array.isArray(result.perfil_dominante)
+        ? result.perfil_dominante.join(", ")
+        : (typeof result.perfil_dominante === 'string' ? result.perfil_dominante : null),
       conexion: result.conexion || null,
       competencias: result.competencias || null,
       lineas: result.lineas || null,

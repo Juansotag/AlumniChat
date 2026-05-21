@@ -761,7 +761,13 @@
 
       const badges = document.getElementById('r-badges');
       badges.innerHTML = '';
-      (res.perfil_dominante || []).forEach(p => {
+      let perfilArray = [];
+      if (Array.isArray(res.perfil_dominante)) {
+        perfilArray = res.perfil_dominante;
+      } else if (typeof res.perfil_dominante === 'string') {
+        perfilArray = res.perfil_dominante.split(',').map(p => p.trim()).filter(Boolean);
+      }
+      perfilArray.forEach(p => {
         const b = document.createElement('span');
         b.className = 'chip';
         b.style.background = 'var(--c-blue-dark)';
