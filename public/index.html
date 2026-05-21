@@ -473,7 +473,7 @@
         <!-- Hoja de vida (PDF) -->
         <div class="form-one-col">
           <div class="field">
-            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional — PDF con
+            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional - PDF con
                 texto)</span></label>
             <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()">
               <input type="file" id="f-cv" accept=".pdf,application/pdf">
@@ -498,7 +498,7 @@
             Al hacer clic en "Analizar mi perfil" acepto el
             <strong>tratamiento de mis datos personales</strong> por parte de la Escuela de Gobierno de la
             Universidad de La Sabana, conforme a su política de privacidad. Entiendo que la información
-            diligenciada —incluyendo mi hoja de vida si la adjunto— será almacenada con fines exclusivos de
+            diligenciada, incluyendo mi hoja de vida si la adjunto, será almacenada con fines exclusivos de
             orientación académica y mejora del programa MPA.
           </label>
         </div>
@@ -635,7 +635,7 @@
         console.log('[CV] Texto extraído, caracteres:', cvTexto.length);
 
         if (!cvTexto.trim()) {
-          console.warn('[CV] Texto vacío — PDF posiblemente escaneado. Se guardará igual.');
+          console.warn('[CV] Texto vacío - PDF posiblemente escaneado. Se guardará igual.');
         }
 
         fileNameDisplay.textContent = '✓ ' + file.name + ' (' + pdf.numPages + ' pág.)';
