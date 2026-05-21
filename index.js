@@ -17,9 +17,7 @@ const MPA_CONTEXT = `
 MAESTRÍA EN ADMINISTRACIÓN PÚBLICA (MPA) — Escuela de Gobierno · Universidad de La Sabana
 
 PERFIL DEL GRADUADO:
-El graduado del MPA es un líder, estratega y gerente de lo público: integra liderazgo humanizador
-y rigor técnico para tomar decisiones éticas, sostenibles y gobernables, las cuales se traducen en
-resultados que crean valor público y mejoran la vida de las personas y comunidades a las que sirven.
+El graduado del MPA es un líder, estratega y gerente de lo público. El MPA también esta pensado para profesionales del sector privado que trabajen asuntos públicos. : integra liderazgo humanizador y rigor técnico para tomar decisiones éticas, sostenibles y gobernables, las cuales se traducen en resultados que crean valor público y mejoran la vida de las personas y comunidades a las que sirven.
 
 TRES COMPETENCIAS DEL GRADUADO:
 1. LÍDER — Genera confianza y credibilidad ejerciendo un liderazgo virtuoso, con transparencia y
@@ -29,7 +27,7 @@ TRES COMPETENCIAS DEL GRADUADO:
 3. GERENTE — Crea valor público medible y sostenible, combinando herramientas de gerencia pública
    para administrar organizaciones y recursos con eficiencia.
 
-ONCE RESULTADOS DE APRENDIZAJE:
+ONCE RESULTADOS DE APRENDIZAJE: Porfa, no escribas los códigos "RA1", "RA2", etc. en la respuesta.
 RA1  – Ejerce liderazgo ético y humanizador en situaciones de tensión institucional, sosteniendo
        decisiones conforme a principios de integridad pública verificables.
 RA2  – Concerta con actores diversos y conduce equipos heterogéneos hacia propósitos compartidos,
@@ -120,6 +118,9 @@ REGLA OBLIGATORIA — ASPIRANTE JOVEN:
      cercana y alcanzable, no una puerta cerrada.
   4. "frase_potente": escribe una frase que celebre este momento en su carrera y anticipe
      su llegada futura al MPA — como una promesa mutua entre la Escuela y el aspirante.
+  5. Para los estudiantes de menos de 30 años, HAY que decir que se necesitan MÍNIMO los 
+  años necesarios para llegar a 30. Por ejemplo, si tiene 25, tienes que decirle al estudiante
+  que NECESITA MÍNIMO 5 años más. 
 
 CONTEXTO OFICIAL DEL PROGRAMA:
 ${MPA_CONTEXT}
@@ -230,7 +231,7 @@ async function logToSupabase(env, body, result, usage) {
       proyeccion: result.proyeccion || null,
       frase_potente: result.frase_potente || null,
       // Uso de tokens (Claude Haiku 4.5)
-      input_tokens:  usage?.input_tokens  || null,
+      input_tokens: usage?.input_tokens || null,
       output_tokens: usage?.output_tokens || null,
     };
 
