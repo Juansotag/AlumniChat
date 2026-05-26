@@ -72,6 +72,13 @@
       margin-bottom: 1.5rem;
     }
 
+    .form-three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
     .form-one-col {
       margin-bottom: 1.5rem;
     }
@@ -282,8 +289,9 @@
       }
     }
 
-    @media (max-width: 600px) {
-      .form-two-col {
+    @media (max-width: 768px) {
+      .form-two-col,
+      .form-three-col {
         grid-template-columns: 1fr;
       }
     }
@@ -368,8 +376,8 @@
 
       <form id="match-form">
 
-        <!-- Fila 0: Nombre + Email -->
-        <div class="form-two-col">
+        <!-- Fila 0: Nombre + Email + Teléfono -->
+        <div class="form-three-col">
           <div class="field">
             <label for="f-nombre">Nombre completo</label>
             <input type="text" id="f-nombre" placeholder="Ej: María Fernanda Ospina" autocomplete="name">
@@ -377,6 +385,10 @@
           <div class="field">
             <label for="f-email">Correo electrónico</label>
             <input type="email" id="f-email" placeholder="Ej: mariaf@correo.com" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="f-telefono">Teléfono <span style="font-weight:300; text-transform:none;">(opcional)</span></label>
+            <input type="tel" id="f-telefono" placeholder="Ej: +57 310 123 4567" autocomplete="tel">
           </div>
         </div>
 
@@ -706,6 +718,7 @@
       const payload = {
         nombre: document.getElementById('f-nombre').value.trim() || null,
         email: document.getElementById('f-email').value.trim() || null,
+        telefono: document.getElementById('f-telefono').value.trim() || null,
         cargo,
         sector: document.getElementById('f-sector').value,
         anos: document.getElementById('f-anos').value,
@@ -795,6 +808,7 @@
     const EJEMPLO = {
       nombre: "Laura Camila Mora Ospina",
       email: "Lauram.ospina@ejemplo.com",
+      telefono: "+57 310 555 7890",
       cargo: "Coordinadora de Proyectos Sociales",
       sector: "Gobierno territorial (gobernación / municipio)",
       anos: "5 a 10 años",
@@ -810,6 +824,7 @@
         e.preventDefault();
         document.getElementById("f-nombre").value = EJEMPLO.nombre;
         document.getElementById("f-email").value = EJEMPLO.email;
+        document.getElementById("f-telefono").value = EJEMPLO.telefono;
         document.getElementById("f-cargo").value = EJEMPLO.cargo;
         document.getElementById("f-intereses").value = EJEMPLO.intereses;
         document.getElementById("f-experiencia").value = EJEMPLO.experiencia;

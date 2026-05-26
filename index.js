@@ -211,6 +211,7 @@ async function logToSupabase(env, body, result, usage) {
       // Datos personales
       nombre: body.nombre || null,
       email: body.email || null,
+      telefono: body.telefono || null,
       // Datos del formulario
       cargo: body.cargo || null,
       sector: body.sector || null,
