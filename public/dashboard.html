@@ -74,6 +74,9 @@ td{padding:.55rem .9rem;vertical-align:top;max-width:200px}
 .frase-box{background:var(--blue);border-radius:10px;padding:1rem 1.25rem;margin-top:.5rem}
 .frase-box .mlbl{color:rgba(255,255,255,.55)}
 .frase-box .mval{color:#fff;font-style:italic;font-size:.95rem}
+.btn-csv{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.4rem 1rem;font-size:.8rem;font-family:var(--f);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:background .2s}
+.btn-csv:hover{background:var(--accent)}
+.btn-csv svg{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -125,7 +128,14 @@ td{padding:.55rem .9rem;vertical-align:top;max-width:200px}
     <div class="chart-card"><h3>Nivel de formacion</h3><div class="chart-wrap"><canvas id="ch-formacion"></canvas></div></div>
     <div class="chart-card"><h3>CV adjunto</h3><div class="chart-wrap"><canvas id="ch-cv"></canvas></div></div>
   </div>
-  <div class="section-hdr"><h2>Candidatos</h2><span id="count-lbl" style="font-size:.82rem;color:var(--muted)"></span></div>
+  <div class="section-hdr">
+    <h2>Candidatos</h2>
+    <span id="count-lbl" style="font-size:.82rem;color:var(--muted)"></span>
+    <button class="btn-csv" id="btn-csv" onclick="exportCSV()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar CSV
+    </button>
+  </div>
   <div class="table-wrap">
     <div id="loading-msg">Cargando datos...</div>
     <table id="tbl" style="display:none">
@@ -272,6 +282,7 @@ function applyFilters(){
   document.getElementById('total-badge').textContent=filtered.length+' candidatos';
   document.getElementById('count-lbl').textContent=filtered.length===allRows.length
     ? allRows.length+' registros' : filtered.length+' de '+allRows.length+' registros';
+  currentFiltered=filtered;
   buildCharts(filtered); renderTable(filtered);
 }
 
@@ -363,16 +374,59 @@ function openModal(r){
 document.getElementById('mcls').addEventListener('click',function(){ document.getElementById('modal-overlay').classList.remove('open'); });
 document.getElementById('modal-overlay').addEventListener('click',function(e){ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); });
 
+// CSV EXPORT
+var currentFiltered=[];
+function exportCSV(){
+  if(!currentFiltered.length){ alert('No hay datos para exportar.'); return; }
+  var cols=[
+    {h:'Fecha',         fn:function(r){ return r.created_at?new Date(r.created_at).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'' }},
+    {h:'Nombre',        fn:function(r){ return r.nombre||'' }},
+    {h:'Email',         fn:function(r){ return r.email||'' }},
+    {h:'Telefono',      fn:function(r){ return r.telefono||'' }},
+    {h:'Cargo',         fn:function(r){ return r.cargo||'' }},
+    {h:'Sector',        fn:function(r){ return r.sector||'' }},
+    {h:'Anos exp.',     fn:function(r){ return r.anos_exp||'' }},
+    {h:'Edad',          fn:function(r){ return r.edad||'' }},
+    {h:'Formacion',     fn:function(r){ return r.formacion||'' }},
+    {h:'Institucion',   fn:function(r){ return r.institucion||'' }},
+    {h:'Intereses',     fn:function(r){ return r.intereses||'' }},
+    {h:'Perfil',        fn:function(r){ return r.perfil_dominante||'' }},
+    {h:'Conexion',      fn:function(r){ return r.conexion||'' }},
+    {h:'Competencias',  fn:function(r){ return r.competencias||'' }},
+    {h:'Lineas',        fn:function(r){ return r.lineas||'' }},
+    {h:'Proyeccion',    fn:function(r){ return r.proyeccion||'' }},
+    {h:'Frase potente', fn:function(r){ return r.frase_potente||'' }},
+    {h:'CV adjunto',    fn:function(r){ return r.cv_path?'Si':'No' }},
+    {h:'Tokens entrada',fn:function(r){ return r.input_tokens!=null?r.input_tokens:'' }},
+    {h:'Tokens salida', fn:function(r){ return r.output_tokens!=null?r.output_tokens:'' }},
+  ];
+  function esc(v){ var s=String(v).replace(/"/g,'""'); return '"'+s+'"'; }
+  var lines=[cols.map(function(c){ return esc(c.h); }).join(',')];
+  currentFiltered.forEach(function(r){
+    lines.push(cols.map(function(c){ return esc(c.fn(r)); }).join(','));
+  });
+  var blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='postulantes_MPA_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 async function deleteRow(id){
   var row=allRows.find(function(r){ return r.id===id; });
   var nombre=row?row.nombre:'este candidato';
-  if(!confirm('¿Estás seguro de que deseas eliminar a '+nombre+'? Esta acción no se puede deshacer.')){
+  if(!confirm('\u00bfEst\u00e1s seguro de que deseas eliminar a '+nombre+'? Esta acci\u00f3n no se puede deshacer.')){
     return;
   }
   try {
-    var res=await db.from('postulantes').delete().eq('id',id);
+    var res=await db.from('postulantes').delete({ count:'exact' }).eq('id',id);
     if(res.error){
       alert('Error al eliminar de la base de datos: '+res.error.message);
+      return;
+    }
+    if(res.count===0){
+      alert('No se pudo eliminar el registro. Verifica que la pol\u00edtica RLS de DELETE est\u00e9 activa en Supabase (ver instrucciones en README).');
       return;
     }
     allRows=allRows.filter(function(row){ return row.id!==id; });
