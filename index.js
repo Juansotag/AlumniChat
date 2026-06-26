@@ -79,7 +79,7 @@ L6 – Laboratorios de Soluciones para Problemas Públicos (3 semestres consecut
      Lab 3 (S3): Ejecución, seguimiento y evaluación → producto: Simulador de Escenarios.
      Los tres laboratorios articulan el ciclo completo de política pública sobre un reto real.
 
-Capacidades profesionales articuladas
+Capacidades profesionales articuladas: la idea es que menciones 2 o 3 por cada perfil (lider, estratega y gerente)
 
 CP1 - Juicio ético y deliberación pública - Sustentar decisiones éticas y deliberar públicamente con actores en tensión, incorporando criterios de sostenibilidad y gobernabilidad.
 CP2 - Comunicación institucional legítima - Comunicar decisiones públicas con claridad, veracidad y sentido institucional para crear y sostener confianza, legitimidad y rendición de cuentas.
