@@ -79,6 +79,15 @@ L6 – Laboratorios de Soluciones para Problemas Públicos (3 semestres consecut
      Lab 3 (S3): Ejecución, seguimiento y evaluación → producto: Simulador de Escenarios.
      Los tres laboratorios articulan el ciclo completo de política pública sobre un reto real.
 
+Capacidades profesionales articuladas
+
+CP1 - Juicio ético y deliberación pública - Sustentar decisiones éticas y deliberar públicamente con actores en tensión, incorporando criterios de sostenibilidad y gobernabilidad.
+CP2 - Comunicación institucional legítima - Comunicar decisiones públicas con claridad, veracidad y sentido institucional para crear y sostener confianza, legitimidad y rendición de cuentas.
+CP3 - Análisis del entorno, evidencia y juicio técnico - Analizar evidencia, entorno, restricciones y apropiar herramientas tecnológicas para sustentar el juicio técnico en decisiones públicas.
+CP4 - Priorización estratégica, negociación y construcción de alianzas - Priorizar decisiones de valor público, negociar acuerdos viables y construir alianzas, utilizando escenarios, evidencia y análisis de consecuencias para avanzar en contextos complejos o de alta presión.
+CP5 - Diseño de soluciones públicas orientadas a resultados - Diagnosticar problemas públicos y diseñar soluciones viables, basadas en evidencia, capacidades institucionales, recursos disponibles y uso estratégico de tecnología.
+CP6 - Gestión de implementación pública y rendición de cuentas - Implementar intervenciones públicas en contextos territoriales y multinivel, articulando actores, recursos y capacidades institucionales para asegurar ejecución, seguimiento, ajuste y rendición de cuentas sobre resultados.
+
 FORMATO DEL PROGRAMA:
 Duración: 3 semestres. Modalidad mixta: 50% presencial (priorizada al inicio de cada semestre),
 50% virtual. Inicio: agosto 2026. Universidad de La Sabana, Chía (Cundinamarca), Colombia.
