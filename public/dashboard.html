@@ -174,9 +174,9 @@ td{padding:.55rem .9rem;vertical-align:top;max-width:200px}
     <div class="msec" style="margin-top:1rem"><div class="mlbl">Hoja de vida</div><div class="mval" id="m-cv">-</div></div>
   </div>
 </div><script>
-var SUPABASE_URL  = 'https://tqtiptguuqtxtkizxrko.supabase.co';
-var SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
-var DASHBOARD_PWD = 'MPA2026';
+var SUPABASE_URL  = window.SUPABASE_URL || 'https://tqtiptguuqtxtkizxrko.supabase.co';
+var SUPABASE_ANON = window.SUPABASE_ANON || 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
+var DASHBOARD_PWD = 'Alumni2026';
 var BUCKET        = 'hojas-de-vida';
 var COLORS        = ['#00135B','#3D5AFE','#7986CB','#9FA8DA','#536DFE','#C5CAE9','#304FFE','#8C9EFF'];
 var PRICE_IN      = 0.80 / 1000000;
@@ -408,7 +408,7 @@ function exportCSV(){
   var blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url; a.download='postulantes_MPA_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=url; a.download='candidatos_AlumniChat_'+new Date().toISOString().slice(0,10)+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
