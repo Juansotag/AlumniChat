@@ -1,162 +1,139 @@
 /**
- * Match Profesional MPA — Cloudflare Worker
- * Backend proxy que protege la API key de Anthropic.
- *
- * SECRETS REQUERIDOS EN CLOUDFLARE (Settings → Variables → Secrets):
- *   ANTHROPIC_API_KEY    — sk-ant-...
- *   SUPABASE_URL         — https://tqtiptguuqtxtkizxrko.supabase.co
- *   SUPABASE_SECRET_KEY  — sb_secret_... (nueva nomenclatura Supabase,
- *                          reemplaza la antigua service_role key;
- *                          bypasea RLS — NUNCA exponer en el cliente)
+ * AlumniChat — Cloudflare Worker Backend
+ * Motor de IA para extracción de Hojas de Vida y Ranking Top 5 de Posgrados UniSabana.
  */
+
+import { UNISABANA_CATALOG_TEXT } from './data/catalog_formatted.js';
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
-/* ── Contexto oficial del MPA (no se toca desde el cliente) ─────────────── */
-const MPA_CONTEXT = `
-MAESTRÍA EN ADMINISTRACIÓN PÚBLICA (MPA) — Escuela de Gobierno · Universidad de La Sabana
+/* ── PROMPTS ─────────────────────────────────────────────────────────────── */
 
-PERFIL DEL GRADUADO:
-El graduado del MPA es un líder, estratega y gerente de lo público. El MPA también esta pensado para profesionales del sector privado que trabajen asuntos públicos. : integra liderazgo humanizador y rigor técnico para tomar decisiones éticas, sostenibles y gobernables, las cuales se traducen en resultados que crean valor público y mejoran la vida de las personas y comunidades a las que sirven.
+const PARSE_CV_SYSTEM_PROMPT = `Eres un extractor experto de Hojas de Vida (CV) para la Universidad de La Sabana. Tu misión es analizar el texto extraído de un documento PDF de hoja de vida y devolver un JSON estructurado con la información del aspirante.
 
-TRES COMPETENCIAS DEL GRADUADO:
-1. LÍDER — Genera confianza y credibilidad ejerciendo un liderazgo virtuoso, con transparencia y
-   orientación al bien común, en entornos institucionales complejos.
-2. ESTRATEGA — Toma decisiones responsables en entornos complejos y cambiantes, aplicando
-   pensamiento estratégico y comunicándolas con claridad.
-3. GERENTE — Crea valor público medible y sostenible, combinando herramientas de gerencia pública
-   para administrar organizaciones y recursos con eficiencia.
+REGLAS DE EXTRACCIÓN:
+1. Extrae únicamente datos reales presentes o deducibles con alta certeza de la hoja de vida. Si algún campo no aparece, usa "".
+2. Clasifica cada ítem educativo en una de estas categorías exactas en "tipo":
+   - "Curso informal"
+   - "Diplomado"
+   - "Técnico"
+   - "Tecnólogo"
+   - "Pregrado"
+   - "Posgrado"
+   - "Doctorado"
+   - "Estudio post-doctoral"
+3. Para cada experiencia laboral, indica la fecha de inicio, fecha de fin (o "Actualidad"), si trabaja allí actualmente (true/false), funciones principales y logros destacados.
 
-ONCE RESULTADOS DE APRENDIZAJE: Porfa, no escribas los códigos "RA1", "RA2", etc. en la respuesta.
-RA1  – Ejerce liderazgo ético y humanizador en situaciones de tensión institucional, sosteniendo
-       decisiones conforme a principios de integridad pública verificables.
-RA2  – Concerta con actores diversos y conduce equipos heterogéneos hacia propósitos compartidos,
-       gestionando crisis institucionales y sosteniendo decisiones bajo presión en entornos de baja
-       confianza y alta conflictividad.
-RA3  – Comunica con efectividad sus decisiones, construyendo legitimidad institucional con
-       capacidad de interlocución ante ciudadanía, medios, equipos y órganos de control en
-       escenarios de alta complejidad.
-RA4  – Analiza entornos políticos, jurídicos, económicos y territoriales complejos, identificando
-       actores, riesgos y escenarios con rigor metodológico.
-RA5  – Interpreta evidencia cuantitativa y cualitativa para evaluar el impacto de políticas
-       públicas y argumentar técnicamente sus resultados.
-RA6  – Construye coaliciones alrededor de la ruta de mayor valor público, a partir de la
-       deliberación sobre alternativas de acción y sus trade-offs éticos, técnicos y de
-       gobernabilidad.
-RA7  – Toma decisiones estratégicas fundamentadas en evidencia y juicio prudencial, asegurando
-       viabilidad jurídica, política, económica y territorial, y gobernabilidad sostenible en el
-       tiempo.
-RA8  – Diagnostica problemas públicos con rigor analítico e indicadores verificables, identificando
-       retos reales de política pública latinoamericana.
-RA9  – Diseña políticas y programas públicos basados en evidencia, con indicadores de resultado,
-       impacto y sostenibilidad verificables, y viabilidad política, técnica y financiera.
-RA10 – Implementa acciones de política territorialmente diferenciadas, operando en sistemas de
-       gobernanza multinivel y articulando planeación, coordinación interinstitucional y gestión
-       del territorio en contextos de alta complejidad.
-RA11 – Evalúa organizaciones, recursos y procesos del ciclo de política pública, monitoreando
-       resultados, ajustando con base en evidencia e integrando aprendizajes para asegurar
-       rendición de cuentas y valor público.
-
-SEIS LÍNEAS ACADÉMICAS:
-L1 – Liderazgo Público Humanizador
-     Carácter ético del líder, equipos y negociación, decisión bajo presión, gerencia estratégica
-     e implementación en lo público.
-L2 – Economía para la Gerencia Pública
-     Fundamentos microeconómicos y macroeconómicos, políticas basadas en evidencia (inferencia
-     causal, evaluación de impacto), economía aplicada a decisiones de gobierno, gestión fiscal.
-L3 – Comunicación Pública
-     Estrategias de comunicación política, construcción de narrativas e imagen pública, comunicación
-     pública efectiva, vocería en alta complejidad y manejo de crisis.
-L4 – Instituciones, Gobernanza y Contexto Global
-     Arquitectura institucional y gobernanza, la política de las políticas públicas (jugadores de
-     veto, coaliciones, ventanas de oportunidad), gerencia pública en el contexto global.
-L5 – Gobernanza Territorial para el Desarrollo
-     Gobernanza local e instituciones democráticas, planeación estratégica y desarrollo territorial,
-     territorio, seguridad y construcción de paz-convivencia.
-L6 – Laboratorios de Soluciones para Problemas Públicos (3 semestres consecutivos)
-     Lab 1 (S1): Diagnóstico, framing y diseño → producto: Assessment de Problemas Públicos.
-     Lab 2 (S2): Formulación de políticas e instrumentos → producto: Plan de Acción.
-     Lab 3 (S3): Ejecución, seguimiento y evaluación → producto: Simulador de Escenarios.
-     Los tres laboratorios articulan el ciclo completo de política pública sobre un reto real.
-
-Capacidades profesionales articuladas: la idea es que menciones 2 o 3 por cada perfil (lider, estratega y gerente)
-
-CP1 - Juicio ético y deliberación pública - Sustentar decisiones éticas y deliberar públicamente con actores en tensión, incorporando criterios de sostenibilidad y gobernabilidad.
-CP2 - Comunicación institucional legítima - Comunicar decisiones públicas con claridad, veracidad y sentido institucional para crear y sostener confianza, legitimidad y rendición de cuentas.
-CP3 - Análisis del entorno, evidencia y juicio técnico - Analizar evidencia, entorno, restricciones y apropiar herramientas tecnológicas para sustentar el juicio técnico en decisiones públicas.
-CP4 - Priorización estratégica, negociación y construcción de alianzas - Priorizar decisiones de valor público, negociar acuerdos viables y construir alianzas, utilizando escenarios, evidencia y análisis de consecuencias para avanzar en contextos complejos o de alta presión.
-CP5 - Diseño de soluciones públicas orientadas a resultados - Diagnosticar problemas públicos y diseñar soluciones viables, basadas en evidencia, capacidades institucionales, recursos disponibles y uso estratégico de tecnología.
-CP6 - Gestión de implementación pública y rendición de cuentas - Implementar intervenciones públicas en contextos territoriales y multinivel, articulando actores, recursos y capacidades institucionales para asegurar ejecución, seguimiento, ajuste y rendición de cuentas sobre resultados.
-
-FORMATO DEL PROGRAMA:
-Duración: 3 semestres. Modalidad mixta: 50% presencial (priorizada al inicio de cada semestre),
-50% virtual. Inicio: agosto 2026. Universidad de La Sabana, Chía (Cundinamarca), Colombia.
-`.trim();
-
-const SYSTEM_PROMPT = `Eres el orientador profesional del Match Profesional MPA de la Escuela de Gobierno de la
-Universidad de La Sabana. Tu misión es mostrarle a cada aspirante con claridad y calidez cuál es su
-OPORTUNIDAD DE CRECIMIENTO dentro del perfil del graduado MPA: si el programa fortalecerá más sus
-habilidades como Líder, como Estratega o como Gerente de lo público, y por qué.  No utilices "—" ni "*" en el texto generado.
-
-PRINCIPIOS IRROMPIBLES:
-- Nunca evalúes si alguien "sirve" o "no sirve" para el programa. Nunca uses lenguaje de admisión
-  o selección. Habla siempre en clave de orientación y crecimiento.
-- El eje central del análisis es la OPORTUNIDAD: ¿dónde puede esta persona crecer más con el MPA?
-  ¿En qué competencia o dimensión del perfil del graduado tiene mayor potencial de desarrollo?
-- TODO lo que digas sobre el programa debe salir exclusivamente del contexto oficial que tienes.
-  No inventes materias, perfiles, metodologías ni cifras que no estén en el contexto.
-- Habla en español colombiano: cálido, cercano, profesional. Evita jerga corporativa fría.
-  Usa "tú" (tuteo). No uses el saludo "Hola". Empieza directamente con el análisis.
-- Sé específico: conecta lo que la persona compartió con elementos CONCRETOS del programa.
-  Una respuesta genérica que podría aplicar a cualquier aspirante es un fracaso.
-
-REGLA OBLIGATORIA — ASPIRANTE JOVEN:
-  El campo "Rango de edad" llega con uno de estos valores exactos desde el formulario.
-  Si el valor es "Menos de 25 años" o "25 a 30 años", DEBES aplicar obligatoriamente
-  el siguiente tratamiento y NO el análisis estándar de match:
-
-  TONO: cálido, esperanzador, nunca desalentador. Es una invitación, no un rechazo.
-  1. "conexion": reconoce con genuinidad el potencial que ya muestra. Luego explica con
-     amabilidad que el MPA está diseñado para profesionales con trayectoria consolidada,
-     porque el programa se nutre del intercambio entre pares con experiencia real en lo
-     público; es esa experiencia la que hace potentes los aprendizajes colectivos.
-  2. "competencias": habla de las semillas de liderazgo/estrategia/gerencia que ya ve en
-     su perfil y cómo el MPA las potenciará cuando llegue el momento.
-  3. "proyeccion": invítala/o con entusiasmo a seguir construyendo trayectoria y a volver
-     cuando tenga más experiencia. La Escuela la/lo estará esperando. El MPA es una meta
-     cercana y alcanzable, no una puerta cerrada.
-  4. "frase_potente": escribe una frase que celebre este momento en su carrera y anticipe
-     su llegada futura al MPA — como una promesa mutua entre la Escuela y el aspirante.
-  5. Para los estudiantes de menos de 30 años, HAY que decir que se necesitan MÍNIMO los 
-  años necesarios para llegar a 30. 
-
-CONTEXTO OFICIAL DEL PROGRAMA:
-${MPA_CONTEXT}
-
-FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown, sin texto adicional.
-SI el rango de edad es "Menos de 25 años" o "25 a 30 años", APLICA la REGLA OBLIGATORIA de arriba
-en los campos conexion, competencias, proyeccion y frase_potente. Es mandatorio, no opcional. Escoge SOLO UN PERFIL DOMINANTE
+FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown:
 {
-  "perfil_dominante": ["Líder", "Estratega", "Gerente"],
-  "conexion": "...",
-  "competencias": "...",
-  "lineas": "...",
-  "proyeccion": "...",
-  "frase_potente": "..."
+  "nombre": "Nombre completo",
+  "email": "correo@ejemplo.com",
+  "telefono": "+57 300 000 0000",
+  "experiencias": [
+    {
+      "cargo": "Nombre del cargo",
+      "empresa": "Nombre de la empresa o institución",
+      "fecha_inicio": "Año o Mes/Año",
+      "fecha_fin": "Año o Mes/Año o Actualidad",
+      "actualmente": true,
+      "funciones": "Descripción de funciones principales",
+      "logros": "Principales logros o impacto obtenido"
+    }
+  ],
+  "formaciones": [
+    {
+      "tipo": "Pregrado",
+      "programa": "Nombre del título o carrera",
+      "institucion": "Nombre de la universidad o institución",
+      "fecha_inicio": "Año o Mes/Año",
+      "fecha_fin": "Año o Mes/Año"
+    }
+  ]
 }`;
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
+const MATCH_TOP5_SYSTEM_PROMPT = `Eres el Orientador Profesional de Posgrados de AlumniChat (Universidad de La Sabana). Tu misión es analizar el perfil estructurado completo de un aspirante (experiencia laboral, formación académica previa, sus planes laborales a 5 años y sus expectativas de posgrado) y evaluar frente a la oferta oficial de maestrías y posgrados de la Universidad de La Sabana para seleccionar el **TOP 5 DE POSGRADOS** ideales para su trayectoria.
+
+PRINCIPIOS IRROMPIBLES:
+1. Selecciona EXACTAMENTE CINCO (5) programas del catálogo oficial proporcionado abajo, ordenados del ranking 1 al 5 según afinidad.
+2. Asigna a cada programa un puntaje numérico de match ("puntaje_match") entre 0 y 100 basado en el grado de alineación de su perfil previo y sus metas a 5 años.
+3. Para cada programa argumenta:
+   - Justificación detallada del match.
+   - Impacto directo en sus planes laborales a 5 años y desarrollo personal.
+   - Competencias clave a potenciar.
+   - URL oficial tal cual aparece en el catálogo.
+4. Habla en español colombiano: cálido, cercano, profesional y motivador. Usa "tú" (tuteo). No uses el saludo "Hola". Empieza directamente con la síntesis del perfil.
+5. No utilices "-", "*", ni caracteres markdown dentro de las cadenas JSON.
+
+CATÁLOGO OFICIAL DE POSGRADOS UNISABANA:
+${UNISABANA_CATALOG_TEXT}
+
+FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown:
+{
+  "sintesis_perfil": "Un párrafo analítico y motivador reconociendo el recorrido del aspirante y su potencial.",
+  "top_5": [
+    {
+      "ranking": 1,
+      "nombre_programa": "Nombre exacto del programa",
+      "puntaje_match": 95,
+      "facultad": "Facultad o Escuela",
+      "modalidad": "Modalidad",
+      "justificacion": "Explicación detallada de por qué este programa se ajusta a su perfil laboral previo.",
+      "impacto_laboral_y_personal": "Cómo contribuirá directamente a sus planes laborales a 5 años y crecimiento personal.",
+      "competencias_clave": "Competencias principales que adquirirá.",
+      "url": "https://..."
+    },
+    {
+      "ranking": 2,
+      "nombre_programa": "...",
+      "puntaje_match": 88,
+      "facultad": "...",
+      "modalidad": "...",
+      "justificacion": "...",
+      "impacto_laboral_y_personal": "...",
+      "competencias_clave": "...",
+      "url": "..."
+    },
+    {
+      "ranking": 3,
+      "nombre_programa": "...",
+      "puntaje_match": 82,
+      "facultad": "...",
+      "modalidad": "...",
+      "justificacion": "...",
+      "impacto_laboral_y_personal": "...",
+      "competencias_clave": "...",
+      "url": "..."
+    },
+    {
+      "ranking": 4,
+      "nombre_programa": "...",
+      "puntaje_match": 78,
+      "facultad": "...",
+      "modalidad": "...",
+      "justificacion": "...",
+      "impacto_laboral_y_personal": "...",
+      "competencias_clave": "...",
+      "url": "..."
+    },
+    {
+      "ranking": 5,
+      "nombre_programa": "...",
+      "puntaje_match": 72,
+      "facultad": "...",
+      "modalidad": "...",
+      "justificacion": "...",
+      "impacto_laboral_y_personal": "...",
+      "competencias_clave": "...",
+      "url": "..."
+    }
+  ],
+  "frase_inspiracional": "Frase potente sobre el futuro profesional del candidato en la Universidad de La Sabana."
+}`;
+
+/* ── HELPERS ─────────────────────────────────────────────────────────────── */
 function corsHeaders(origin) {
-  const allowed = [
-    "https://mpaescueladegobierno.com.co",
-    "https://www.mpaescueladegobierno.com.co",
-    "https://govlab.up.railway.app",
-    "http://localhost:8000",
-    "https://mpachat-unisabana.up.railway.app"
-  ];
-  const allowedOrigin = allowed.includes(origin) ? origin : allowed[0];
   return {
-    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
@@ -169,79 +146,38 @@ function jsonResponse(data, status = 200, origin = "") {
   });
 }
 
-/* ── Rate limiting simple (por IP, en memoria — resetea con cada instancia) */
-const requestLog = new Map();
-const RATE_LIMIT = 5;       // máx solicitudes por ventana
-const RATE_WINDOW = 60_000; // ventana de 60 segundos
-
-function isRateLimited(ip) {
-  const now = Date.now();
-  const entry = requestLog.get(ip) || { count: 0, start: now };
-  if (now - entry.start > RATE_WINDOW) {
-    requestLog.set(ip, { count: 1, start: now });
-    return false;
-  }
-  if (entry.count >= RATE_LIMIT) return true;
-  entry.count++;
-  requestLog.set(ip, entry);
-  return false;
-}
-
-/* ── Validación y construcción del mensaje ───────────────────────────────── */
-function buildUserMessage(body) {
-  const { cargo, sector, anos, experiencia, motivacion, intereses, formacion, institucion, edad, cvTexto } = body;
-  if (!experiencia?.trim() && !motivacion?.trim()) {
-    throw new Error("Comparte al menos tu experiencia o tu motivación.");
-  }
-  return [
-    cargo && `Cargo actual: ${cargo}`,
-    sector && `Sector: ${sector}`,
-    anos && `Años de experiencia: ${anos}`,
-    edad && `Rango de edad: ${edad}`,
-    formacion && `Nivel de formación más alto alcanzado: ${formacion}`,
-    institucion && `Institución donde obtuvo ese título: ${institucion}`,
-    experiencia && `Experiencia y logros: ${experiencia}`,
-    motivacion && `Motivación para el MPA: ${motivacion}`,
-    intereses && `Temas de interés: ${intereses}`,
-    cvTexto && `Hoja de vida (texto):\n${cvTexto}`,
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
-
-/* ── Supabase: registrar metadatos del postulante ────────────────────────── */
+/* ── Supabase Logging ────────────────────────────────────────────────────── */
 async function logToSupabase(env, body, result, usage) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SECRET_KEY) {
-    console.warn("[Supabase] Faltan secrets SUPABASE_URL o SUPABASE_SECRET_KEY");
+    console.warn("[Supabase] Faltan secrets de configuración.");
     return;
   }
   try {
+    const top5 = Array.isArray(result.top_5) ? result.top_5 : [];
+    const progsStr = top5.map(r => `#${r.ranking} ${r.nombre_programa} (${r.puntaje_match} pts)`).join("\n");
+    const compsStr = top5.map(r => `${r.nombre_programa}: ${r.competencias_clave}`).join("\n\n");
+    const proyStr = top5.map(r => `${r.nombre_programa}: ${r.impacto_laboral_y_personal}`).join("\n\n");
+
     const row = {
-      // Datos personales
       nombre: body.nombre || null,
       email: body.email || null,
       telefono: body.telefono || null,
-      // Datos del formulario
-      cargo: body.cargo || null,
-      sector: body.sector || null,
-      anos_exp: body.anos || null,
+      cargo: body.experiencias?.[0]?.cargo || null,
+      sector: body.experiencias?.[0]?.empresa || null,
+      anos_exp: `${body.experiencias?.length || 0} experiencia(s)`,
       edad: body.edad || null,
-      formacion: body.formacion || null,
-      institucion: body.institucion || null,
-      intereses: body.intereses || null,
-      experiencia: body.experiencia || null,
-      motivacion: body.motivacion || null,
+      formacion: body.formaciones?.[0]?.tipo || null,
+      institucion: body.formaciones?.[0]?.institucion || null,
+      intereses: body.planes_5_anos || null,
+      experiencia: JSON.stringify(body.experiencias || []),
+      motivacion: body.expectativas_posgrado || null,
       cv_path: body.cvPath || null,
-      // Respuesta de la IA
-      perfil_dominante: Array.isArray(result.perfil_dominante)
-        ? result.perfil_dominante.join(", ")
-        : (typeof result.perfil_dominante === 'string' ? result.perfil_dominante : null),
-      conexion: result.conexion || null,
-      competencias: result.competencias || null,
-      lineas: result.lineas || null,
-      proyeccion: result.proyeccion || null,
-      frase_potente: result.frase_potente || null,
-      // Uso de tokens (Claude Haiku 4.5)
+      perfil_dominante: top5.map(r => `${r.nombre_programa} (${r.puntaje_match}%)`).join(" | ") || result.sintesis_perfil || null,
+      conexion: result.sintesis_perfil || null,
+      competencias: compsStr || null,
+      lineas: progsStr || null,
+      proyeccion: proyStr || null,
+      frase_potente: result.frase_inspiracional || null,
       input_tokens: usage?.input_tokens || null,
       output_tokens: usage?.output_tokens || null,
     };
@@ -263,14 +199,14 @@ async function logToSupabase(env, body, result, usage) {
     if (!res.ok) {
       console.error("[Supabase] Error HTTP:", res.status, await res.text());
     } else {
-      console.log("[Supabase] Postulante guardado correctamente.");
+      console.log("[Supabase] Registro guardado correctamente.");
     }
   } catch (e) {
     console.error("[Supabase] Excepción:", e.message);
   }
 }
 
-/* ── Handler principal ───────────────────────────────────────────────────── */
+/* ── HANDLER PRINCIPAL ───────────────────────────────────────────────────── */
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin") || "";
@@ -283,24 +219,78 @@ export default {
       return jsonResponse({ error: "Método no permitido." }, 405, origin);
     }
 
-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    if (isRateLimited(ip)) {
-      return jsonResponse({ error: "Demasiadas solicitudes. Espera un momento." }, 429, origin);
-    }
-
     let body;
     try {
       body = await request.json();
     } catch {
-      return jsonResponse({ error: "Body inválido." }, 400, origin);
+      return jsonResponse({ error: "Body JSON inválido." }, 400, origin);
     }
 
-    let userMessage;
-    try {
-      userMessage = buildUserMessage(body);
-    } catch (err) {
-      return jsonResponse({ error: err.message }, 400, origin);
+    const action = body.action || "match_top5";
+
+    /* ── ACCIÓN 1: Extraer CV (parse_cv) ─────────────────────────────────── */
+    if (action === "parse_cv") {
+      const { cvTexto } = body;
+      if (!cvTexto?.trim()) {
+        return jsonResponse({ error: "Texto de CV no proporcionado." }, 400, origin);
+      }
+
+      const anthropicRes = await fetch(ANTHROPIC_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": env.ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 2500,
+          system: PARSE_CV_SYSTEM_PROMPT,
+          messages: [
+            {
+              role: "user",
+              content: `Extrae la información estructurada de esta hoja de vida:\n\n${cvTexto}`,
+            },
+          ],
+        }),
+      });
+
+      if (!anthropicRes.ok) {
+        return jsonResponse({ error: "Error al procesar la lectura del CV." }, 502, origin);
+      }
+
+      const data = await anthropicRes.json();
+      const text = data.content?.[0]?.text || "";
+
+      try {
+        let clean = text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(clean);
+        return jsonResponse({ ok: true, data: parsed }, 200, origin);
+      } catch (e) {
+        return jsonResponse({ error: "Error parseando estructura de CV." }, 500, origin);
+      }
     }
+
+    /* ── ACCIÓN 2: Ranking Top 5 (match_top5) ────────────────────────────── */
+    const userPrompt = `
+PERFIL DEL ASPIRANTE:
+Nombre: ${body.nombre || "No especificado"}
+Email: ${body.email || "No especificado"}
+Teléfono: ${body.telefono || "No especificado"}
+Edad: ${body.edad || "No especificado"}
+
+EXPERIENCIAS LABORALES:
+${JSON.stringify(body.experiencias || [], null, 2)}
+
+FORMACIONES ACADÉMICAS:
+${JSON.stringify(body.formaciones || [], null, 2)}
+
+PLANES LABORALES A 5 AÑOS:
+${body.planes_5_anos || "No especificados"}
+
+EXPECTATIVAS DE UN POSGRADO UNISABANA:
+${body.expectativas_posgrado || "No especificadas"}
+`.trim();
 
     const anthropicRes = await fetch(ANTHROPIC_URL, {
       method: "POST",
@@ -311,59 +301,33 @@ export default {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 2400,
-        system: SYSTEM_PROMPT,
+        max_tokens: 3500,
+        system: MATCH_TOP5_SYSTEM_PROMPT,
         messages: [
           {
             role: "user",
-            content: `Analiza el perfil de este aspirante al MPA:\n\n${userMessage}`,
+            content: `Evalúa este aspirante y genera su Top 5 de Posgrados UniSabana:\n\n${userPrompt}`,
           },
         ],
       }),
     });
 
     if (!anthropicRes.ok) {
-      const err = await anthropicRes.json().catch(() => ({}));
-      console.error("Anthropic error:", err);
-      return jsonResponse(
-        { error: "Error al procesar la solicitud. Intenta de nuevo." },
-        502,
-        origin
-      );
+      return jsonResponse({ error: "Error al generar el ranking de posgrados." }, 502, origin);
     }
 
     const data = await anthropicRes.json();
     const text = data.content?.[0]?.text || "";
-    console.log("[Worker] Respuesta Anthropic (primeros 300 chars):", text.substring(0, 300));
 
     let parsed;
     try {
-      // Intento 1: limpiar markdown y parsear directo
       let clean = text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
-
-      // Intento 2: si falla, extraer el primer bloque JSON {...} del texto
-      try {
-        parsed = JSON.parse(clean);
-      } catch {
-        const match = clean.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error("No se encontró bloque JSON en la respuesta");
-        parsed = JSON.parse(match[0]);
-      }
+      parsed = JSON.parse(clean);
     } catch (e) {
-      console.error("[Worker] JSON parse error:", e.message);
-      console.error("[Worker] Raw text completo:", text);
-      return jsonResponse(
-        { error: "Error al interpretar la respuesta. Intenta de nuevo." },
-        500,
-        origin
-      );
+      return jsonResponse({ error: "Error al interpretar la respuesta de la IA." }, 500, origin);
     }
 
-    // Capturar uso de tokens de la respuesta de Anthropic
     const usage = data.usage || {};
-    console.log("[Worker] Tokens — input:", usage.input_tokens, "output:", usage.output_tokens);
-
-    // Guardar en Supabase — ctx.waitUntil mantiene el Worker vivo
     ctx.waitUntil(logToSupabase(env, body, parsed, usage));
 
     return jsonResponse({ ok: true, result: parsed }, 200, origin);

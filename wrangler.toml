@@ -1,10 +1,10 @@
-name = "mpa-match"
+name = "alumni-chat"
 main = "index.js"
 compatibility_date = "2024-01-01"
 
-# La API key se agrega como secreto desde el dashboard o con:
+# Secrets requeridos:
 #   npx wrangler secret put ANTHROPIC_API_KEY
-# Nunca la pongas aquí en texto plano.
+#   npx wrangler secret put SUPABASE_URL
+#   npx wrangler secret put SUPABASE_SECRET_KEY
 
 [vars]
-# Variables no sensibles van aquí (vacío por ahora)

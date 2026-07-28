@@ -1,7 +1,7 @@
 {
-  "name": "mpa-match",
+  "name": "alumni-chat",
   "version": "1.0.0",
-  "description": "Widget Match Profesional MPA — Escuela de Gobierno · Universidad de La Sabana",
+  "description": "AlumniChat — Orientador de Posgrados Universidad de La Sabana",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

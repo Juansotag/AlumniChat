@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Match Profesional MPA | Escuela de Gobierno · Universidad de La Sabana</title>
+  <title>AlumniChat | Orientador de Posgrados Universidad de La Sabana</title>
   <meta name="description"
-    content="Descubre cómo la Maestría en Administración Pública potencia tu trayectoria. Análisis de perfil personalizado, asistido por IA.">
+    content="AlumniChat: Descubre el Top 5 de posgrados UniSabana que mejor se adaptan a tu hoja de vida y planes profesionales a 5 años.">
 
-  <!-- Google Fonts: Libre Franklin + Playfair Display -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -18,12 +18,10 @@
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-  <!-- Sistema de diseño institucional -->
+  <!-- Sistema de diseño -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Solo un override mínimo para elementos que no existen en styles.css -->
   <style>
-    /* Fuente local Publico Banner → fallback a Playfair Display (ya cargada) */
     @font-face {
       font-family: 'Publico Banner';
       src: url('./assets/fonts/PublicoBannerWeb-LightItalic_govlab.woff2') format('woff2');
@@ -32,316 +30,133 @@
       font-display: swap;
     }
 
-    /* Elementos específicos del Match que no están en styles.css */
-    .match-hero {
-      background: var(--c-blue-dark);
-      color: #fff;
-      padding: 5rem 2rem;
-      text-align: center;
-    }
-
-    .match-hero h1 {
-      color: #fff;
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      line-height: 1.15;
-      margin-bottom: 1.25rem;
-    }
-
-    .match-hero h1 em {
-      font-style: italic;
-      color: rgba(255, 255, 255, 0.80);
-    }
-
-    .match-hero p {
-      font-size: 1.1rem;
-      opacity: 0.85;
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    .match-body {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    .form-two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-three-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-one-col {
-      margin-bottom: 1.5rem;
-    }
-
-    .field {
+    .step-indicator {
       display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .field label {
-      font-family: var(--font-label);
-      font-size: var(--fs-sm);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      font-family: var(--font-main);
-      font-size: var(--fs-md);
-      color: var(--text-primary);
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 0.75rem 1rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      outline: none;
-      border-color: var(--c-blue-dark);
-      box-shadow: 0 0 0 3px rgba(0, 19, 91, 0.10);
-    }
-
-    .field textarea {
-      resize: vertical;
-      min-height: 110px;
-      line-height: 1.6;
-    }
-
-    /* Campo de archivo */
-    .file-upload-area {
-      border: 2px dashed var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      background: var(--bg-card);
-    }
-
-    .file-upload-area:hover,
-    .file-upload-area.drag-over {
-      border-color: var(--c-blue-dark);
-      background: rgba(0, 19, 91, 0.04);
-    }
-
-    .file-upload-area input[type="file"] {
-      display: none;
-    }
-
-    .file-processing {
-      display: none;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.6rem;
-      font-size: var(--fs-sm);
-      color: var(--text-muted);
-    }
-
-    .file-processing .mini-spinner {
-      width: 13px;
-      height: 13px;
-      border: 2px solid rgba(0, 19, 91, 0.25);
-      border-top-color: var(--c-blue-dark);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-
-    .file-upload-icon {
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-      display: block;
-      opacity: 0.4;
-    }
-
-    .file-upload-text {
-      font-size: var(--fs-sm);
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .file-upload-text strong {
-      color: var(--c-blue-dark);
-    }
-
-    #file-name-display {
-      margin-top: 0.5rem;
-      font-size: var(--fs-sm);
-      color: var(--c-blue-dark);
-      font-weight: 600;
-      display: none;
-    }
-
-    /* Aviso de tratamiento de datos */
-    .consent-box {
-      background: rgba(0, 19, 91, 0.05);
-      border: 1px solid rgba(0, 19, 91, 0.18);
-      border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: flex-start;
+      justify-content: center;
       gap: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
     }
 
-    .consent-box input[type="checkbox"] {
-      flex-shrink: 0;
-      margin-top: 3px;
-      width: 17px;
-      height: 17px;
-      accent-color: var(--c-blue-dark);
-      cursor: pointer;
+    .step-pill {
+      background: rgba(0, 19, 91, 0.06);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      transition: all 0.2s;
     }
 
-    .consent-box label {
-      font-size: var(--fs-sm);
-      color: var(--text-secondary);
-      line-height: 1.6;
-      cursor: pointer;
-    }
-
-    .consent-box label strong {
-      color: var(--text-primary);
-    }
-
-    /* Resultado */
-    #results-area {
-      display: none;
-      margin-top: 3rem;
-      animation: fadeIn 0.5s ease forwards;
-    }
-
-    .result-section-title {
-      font-size: var(--fs-sm);
-      font-family: var(--font-label);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-weight: 700;
-      color: var(--c-blue-dark);
-      opacity: 0.6;
-      margin-bottom: 0.5rem;
-    }
-
-    .result-text {
-      color: var(--text-secondary);
-      font-size: var(--fs-md);
-      line-height: var(--lh);
-    }
-
-    /* Frase potente final */
-    .frase-potente-wrapper {
-      margin-top: 2.5rem;
-      padding: 2rem 2.5rem;
+    .step-pill.active {
       background: var(--c-blue-dark);
-      border-radius: var(--radius);
-      text-align: center;
+      color: #fff;
     }
 
-    .frase-potente-label {
-      font-size: var(--fs-sm);
-      font-family: var(--font-label);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.55);
+    .step-pill.completed {
+      background: rgba(0, 19, 91, 0.15);
+      color: var(--c-blue-dark);
+    }
+
+    .dynamic-item-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .btn-remove-item {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-remove-item:hover {
+      background: #fca5a5;
+    }
+
+    .btn-add-item {
+      background: rgba(0, 19, 91, 0.05);
+      color: var(--c-blue-dark);
+      border: 1px dashed var(--c-blue-dark);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      width: 100%;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-add-item:hover {
+      background: rgba(0, 19, 91, 0.10);
+    }
+
+    /* Tarjetas del Ranking Top 5 */
+    .top5-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 16px rgba(0, 19, 91, 0.06);
+      margin-bottom: 2rem;
+    }
+
+    .top5-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
       margin-bottom: 1rem;
     }
 
-    .frase-potente-text {
-      font-family: 'Publico Banner', 'Playfair Display', Georgia, serif;
-      font-size: clamp(1.3rem, 3vw, 1.9rem);
+    .score-badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .score-bar-bg {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+      border-radius: 999px;
+      transition: width 1s ease-in-out;
+    }
+
+    .match-tag {
+      display: inline-block;
+      background: var(--c-blue-dark);
       color: #fff;
-      line-height: 1.35;
-      font-style: italic;
-    }
-
-    .spinner-inline {
-      display: none;
-      width: 18px;
-      height: 18px;
-      border: 2.5px solid rgba(255, 255, 255, 0.35);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .form-two-col,
-      .form-three-col {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Print / PDF ──────────────────────────────────────────── */
-    @page {
-      size: A4;
-      margin: 1.5cm 2cm;
-    }
-
-    @media print {
-
-      /* Preservar fondos de color */
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      /* Ocultar elementos no necesarios en el PDF */
-      #navbar,
-      form,
-      #error-msg,
-      #btn-submit,
-      .text-center,
-      .match-hero p {
-        display: none !important;
-      }
-
-      /* Hero compacto en impresión */
-      .match-hero {
-        padding: 2.5rem 2rem;
-        background: var(--c-blue-dark) !important;
-      }
-
-      /* Sin sombras ni animaciones */
-      .module-card {
-        box-shadow: none !important;
-        border: 1px solid var(--c-blue-dark) !important;
-      }
-
-      body {
-        background: #fff !important;
-      }
-
-      /* Evitar cortes en bloques de texto */
-      .result-text,
-      .frase-potente-wrapper,
-      .result-section-title {
-        page-break-inside: avoid;
-      }
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
@@ -349,234 +164,179 @@
 <body>
 
   <!-- ══ NAVBAR ══════════════════════════════════════════════════════ -->
-  <nav id="navbar">
-    <div class="nav-container">
-      <div class="nav-logos">
-        <img src="assets/Govlab.png" class="logo-govlab" alt="GovLab">
-        <div class="logo-divider"></div>
-        <img src="assets/Egus.png" class="logo-unisabana" alt="Escuela de Gobierno">
-      </div>
+  <nav id="navbar" style="background: var(--c-blue-dark); padding: 1.1rem 2rem;">
+    <div class="nav-container" style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+      <span style="color: #fff; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;">
+        AlumniChat
+      </span>
+      <span style="color: rgba(255,255,255,0.75); font-size: 0.85rem; font-weight: 500;">
+        Orientador de Posgrados UniSabana
+      </span>
     </div>
   </nav>
 
   <!-- ══ HERO ═══════════════════════════════════════════════════════ -->
-  <header class="match-hero">
-    <h1>Tu experiencia tiene valor.<br><em>El MPA puede convertirla</em><br>en ruta de crecimiento.</h1>
-    <p>Cuéntanos sobre tu trayectoria y te mostramos, de forma personalizada, cómo la Maestría en Administración
-      Pública puede potenciar tu carrera en lo público.</p>
+  <header class="match-hero" style="background: var(--c-blue-dark); color: #fff; padding: 3.5rem 2rem; text-align: center;">
+    <h1 style="color:#fff; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; margin-bottom: 1rem;">
+      Descubre tu posgrado ideal.<br><em>Construye tu Top 5 con Inteligencia Artificial</em>
+    </h1>
+    <p style="font-size: 1.05rem; opacity: 0.85; max-width: 700px; margin: 0 auto;">
+      Sube tu Hoja de Vida en PDF. Extraeremos tu perfil automáticamente y analizaremos los más de 140 posgrados de la Universidad de La Sabana para entregarte tu Ranking Top 5 personalizado.
+    </p>
   </header>
 
-  <!-- ══ FORMULARIO ══════════════════════════════════════════════════ -->
-  <div class="match-body">
-    <section class="module-card" style="padding: 2.5rem;">
+  <!-- ══ CONTENIDO PRINCIPAL ═════════════════════════════════════════ -->
+  <div class="match-body" style="max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem;">
 
-      <h2 style="margin-bottom: 0.25rem;">Tu perfil</h2>
-      <p class="section-subtitle" style="margin-bottom: 2rem;">Mientras más detalle compartas, más preciso será el
-        análisis.</p>
+    <!-- Indicador de pasos -->
+    <div class="step-indicator">
+      <div class="step-pill active" id="pill-step-1">1. Cargar Hoja de Vida</div>
+      <div class="step-pill" id="pill-step-2">2. Confirmar Perfil Extraído</div>
+      <div class="step-pill" id="pill-step-3">3. Proyección a 5 Años</div>
+      <div class="step-pill" id="pill-step-4">4. Ranking Top 5</div>
+    </div>
 
-      <form id="match-form">
+    <!-- ══ PASO 1: SUBIR HOJA DE VIDA ════════════════════════════════ -->
+    <section id="sec-step-1" class="module-card" style="padding: 2.5rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color);">
+      <h2 style="margin-bottom: 0.25rem;">Paso 1: Sube tu Hoja de Vida (PDF)</h2>
+      <p class="section-subtitle" style="margin-bottom: 2rem; color: var(--text-muted);">
+        Para comenzar, adjunta tu CV en formato PDF. Nuestro sistema estructurará tu historia laboral y académica en segundos.
+      </p>
 
-        <!-- Fila 0: Nombre + Email + Teléfono -->
-        <div class="form-three-col">
-          <div class="field">
-            <label for="f-nombre">Nombre completo</label>
-            <input type="text" id="f-nombre" placeholder="Ej: María Fernanda Ospina" autocomplete="name">
-          </div>
-          <div class="field">
-            <label for="f-email">Correo electrónico</label>
-            <input type="email" id="f-email" placeholder="Ej: mariaf@correo.com" autocomplete="email">
-          </div>
-          <div class="field">
-            <label for="f-telefono">Teléfono <span style="font-weight:300; text-transform:none;">(opcional)</span></label>
-            <input type="tel" id="f-telefono" placeholder="Ej: +57 310 123 4567" autocomplete="tel">
-          </div>
+      <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()"
+        style="border: 2px dashed var(--c-blue-dark); border-radius: 14px; padding: 2.5rem; text-align: center; cursor: pointer; background: rgba(0,19,91,0.02);">
+        <input type="file" id="f-cv" accept="application/pdf,.pdf" style="display:none;">
+        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">📄</span>
+        <div style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+          <strong style="color: var(--c-blue-dark);">Haz clic para seleccionar tu Hoja de Vida (PDF)</strong> o arrástrala aquí
         </div>
+        <div id="file-name-display" style="font-weight: 700; color: var(--c-blue-dark); display: none;"></div>
+      </div>
 
-        <!-- Fila 1: Cargo + Sector -->
-        <div class="form-two-col">
-          <div class="field">
-            <label for="f-cargo">Cargo o rol actual</label>
-            <input type="text" id="f-cargo" placeholder="Ej: Coordinadora de proyectos" autocomplete="off">
-          </div>
-          <div class="field">
-            <label for="f-sector">Sector</label>
-            <select id="f-sector">
-              <option value="">Selecciona...</option>
-              <option>Gobierno nacional</option>
-              <option>Gobierno territorial (gobernación / municipio)</option>
-              <option>Sector privado</option>
-              <option>Organizaciones sociales / ONG</option>
-              <option>Academia / investigación</option>
-              <option>Organismos internacionales</option>
-              <option>Otro</option>
-            </select>
-          </div>
-        </div>
+      <div id="parse-loading" style="display:none; text-align:center; padding: 2rem 0;">
+        <div class="spinner-inline" style="width:24px; height:24px; border:3px solid rgba(0,19,91,0.2); border-top-color:var(--c-blue-dark); border-radius:50%; animation:spin 0.7s linear infinite; margin: 0 auto 0.75rem;"></div>
+        <p style="color: var(--c-blue-dark); font-weight: 600;">Leyendo y extrayendo tu experiencia laboral y académica con Inteligencia Artificial...</p>
+      </div>
 
-        <!-- Fila 2: Años de experiencia + Rango de edad -->
-        <div class="form-two-col">
-          <div class="field">
-            <label for="f-anos">Años de experiencia laboral</label>
-            <select id="f-anos">
-              <option value="">Selecciona...</option>
-              <option>2 a 5 años</option>
-              <option>5 a 10 años</option>
-              <option>Más de 10 años</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-edad">Rango de edad</label>
-            <select id="f-edad">
-              <option value="">Selecciona...</option>
-              <option>25 a 30 años</option>
-              <option>31 a 35 años</option>
-              <option>36 a 40 años</option>
-              <option>41 a 50 años</option>
-              <option>Más de 50 años</option>
-            </select>
-          </div>
-        </div>
+      <div id="error-step-1" style="display:none; margin-top:1rem; background:#fee2e2; border:1px solid #fca5a5; padding:0.75rem; border-radius:8px; color:#991b1b; font-size:0.9rem;"></div>
 
-        <!-- Fila 3: Nivel de formación + Institución -->
-        <div class="form-two-col">
-          <div class="field">
-            <label for="f-formacion">Nivel de formación más alto alcanzado</label>
-            <select id="f-formacion">
-              <option value="">Selecciona...</option>
-              <option>Pregrado / Licenciatura</option>
-              <option>Especialización</option>
-              <option>Maestría</option>
-              <option>Doctorado</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-institucion">Institución donde obtuvo ese título</label>
-            <input type="text" id="f-institucion" placeholder="Ej: Universidad Nacional de Colombia" autocomplete="off">
-          </div>
-        </div>
+      <div class="text-center" style="margin-top: 2rem;">
+        <button class="btn btn-giant-primary" id="btn-parse-cv" onclick="processUploadedCV()" style="display:none;">
+          <span>Continuar con mi perfil extraído ➔</span>
+        </button>
+      </div>
+    </section>
 
-        <!-- Fila 4: Temas de interés (full width) -->
-        <div class="form-one-col">
-          <div class="field">
-            <label for="f-intereses">Temas de interés <span
-                style="font-weight:300; text-transform:none;">(opcional)</span></label>
-            <input type="text" id="f-intereses" placeholder="Ej: gestión territorial, innovación...">
-          </div>
-        </div>
-
-        <!-- Experiencia -->
-        <div class="form-one-col">
-          <div class="field">
-            <label for="f-experiencia">Tu experiencia y logros más relevantes</label>
-            <textarea id="f-experiencia"
-              placeholder="Ej: He liderado equipos en diseño de proyectos sociales en municipios de Cundinamarca..."></textarea>
-          </div>
-        </div>
-
-        <!-- Motivación -->
-        <div class="form-one-col">
-          <div class="field">
-            <label for="f-motivacion">¿Por qué te interesa el MPA? ¿Qué esperas lograr?</label>
-            <textarea id="f-motivacion"
-              placeholder="Ej: Quiero tomar decisiones de política pública con mayor rigor..."></textarea>
-          </div>
-        </div>
-
-        <!-- Hoja de vida (PDF) -->
-        <div class="form-one-col">
-          <div class="field">
-            <label>Hoja de vida <span style="font-weight:300; text-transform:none;">(opcional - PDF con
-                texto)</span></label>
-            <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()">
-              <input type="file" id="f-cv" accept=".pdf,application/pdf">
-              <span class="file-upload-icon">📋</span>
-              <div class="file-upload-text">
-                <strong>Haz clic para seleccionar</strong> o arrastra tu PDF aquí<br>
-                Solo PDFs con texto (no imágenes escaneadas). El texto se extrae en tu navegador.
-              </div>
-              <div class="file-processing" id="file-processing">
-                <div class="mini-spinner"></div>
-                <span>Extrayendo texto del PDF…</span>
-              </div>
-              <div id="file-name-display"></div>
+    <!-- ══ PASO 2 Y 3: FORMULARIO DINÁMICO Y PROYECCIÓN ═══════════════ -->
+    <section id="sec-step-2" style="display:none;">
+      <form id="full-profile-form">
+        
+        <!-- Bloque Datos Básicos -->
+        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 1.25rem; color: var(--c-blue-dark);">1. Datos Personales</h3>
+          <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+            <div class="field">
+              <label for="f-nombre">Nombre completo</label>
+              <input type="text" id="f-nombre" required>
+            </div>
+            <div class="field">
+              <label for="f-email">Correo electrónico</label>
+              <input type="email" id="f-email" required>
+            </div>
+            <div class="field">
+              <label for="f-telefono">Teléfono de contacto</label>
+              <input type="tel" id="f-telefono">
+            </div>
+            <div class="field">
+              <label for="f-edad">Rango de edad</label>
+              <select id="f-edad">
+                <option value="">Selecciona...</option>
+                <option>Menos de 25 años</option>
+                <option>25 a 30 años</option>
+                <option>31 a 35 años</option>
+                <option>36 a 40 años</option>
+                <option>41 a 50 años</option>
+                <option>Más de 50 años</option>
+              </select>
             </div>
           </div>
         </div>
 
+        <!-- Bloque Experiencia Laboral Dinámica -->
+        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">2. Experiencia Laboral</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Confirma o ajusta los roles laborales extraídos de tu Hoja de Vida.</p>
+
+          <div id="experiencias-container"></div>
+          <button type="button" class="btn-add-item" onclick="addExperienciaBlock()">+ Agregar otra experiencia laboral</button>
+        </div>
+
+        <!-- Bloque Formación Académica Dinámica -->
+        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">3. Formación Académica</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Confirma tu historial de estudios (grados, títulos, especializaciones, diplomados, etc.).</p>
+
+          <div id="formaciones-container"></div>
+          <button type="button" class="btn-add-item" onclick="addFormacionBlock()">+ Agregar otra formación académica</button>
+        </div>
+
+        <!-- Bloque Proyección Estratégica -->
+        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">4. Proyección Profesional y Metas</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Cuéntanos tus aspiraciones para personalizar tu Top 5.</p>
+
+          <div class="field" style="margin-bottom: 1.5rem;">
+            <label for="f-planes-5anos">¿Cuáles son tus planes laborales en los próximos cinco años?</label>
+            <textarea id="f-planes-5anos" required placeholder="Ej: Ascender a una dirección ejecutiva, consolidar mi firma consultora, liderar proyectos internacionales..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="f-expectativas">¿Qué esperas conseguir con un posgrado de la Universidad de La Sabana?</label>
+            <textarea id="f-expectativas" required placeholder="Ej: Desarrollar competencias en toma de decisiones estratégicas, ampliar red de contactos, dominar herramientas de innovación..."></textarea>
+          </div>
+        </div>
+
         <!-- Consentimiento -->
-        <div class="consent-box">
-          <input type="checkbox" id="f-consent" required>
-          <label for="f-consent">
-            Al hacer clic en "Analizar mi perfil" acepto el
-            <strong>tratamiento de mis datos personales</strong> por parte de la Escuela de Gobierno de la
-            Universidad de La Sabana, conforme a su política de privacidad. Entiendo que la información
-            diligenciada, incluyendo mi hoja de vida si la adjunto, será almacenada con fines exclusivos de
-            orientación académica y mejora del programa MPA.
+        <div class="consent-box" style="background: rgba(0, 19, 91, 0.05); border: 1px solid rgba(0, 19, 91, 0.18); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem;">
+          <input type="checkbox" id="f-consent" required style="margin-top:0.25rem;">
+          <label for="f-consent" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+            Acepto el <strong>tratamiento de mis datos personales</strong> por la Universidad de La Sabana para efectos de orientación académica y guardado de mi perfil.
           </label>
         </div>
 
-        <div id="error-msg"
-          style="display:none; background:rgba(0,19,91,0.07); border:1px solid var(--c-blue-dark); border-radius:8px; padding:0.75rem 1rem; color:var(--c-blue-dark); font-size:var(--fs-md); margin-bottom:1rem;">
-        </div>
+        <div id="error-step-2" style="display:none; margin-bottom:1rem; background:#fee2e2; border:1px solid #fca5a5; padding:0.75rem; border-radius:8px; color:#991b1b; font-size:0.9rem;"></div>
 
         <div class="text-center">
-          <button type="submit" class="btn btn-giant-primary" id="btn-submit"
-            style="display:inline-flex; align-items:center; gap:0.75rem;">
-            <div class="spinner-inline" id="spinner"></div>
-            <span id="btn-text">Analizar mi perfil match</span>
+          <button type="submit" class="btn btn-giant-primary" id="btn-submit-match" style="display:inline-flex; align-items:center; gap:0.75rem;">
+            <div class="spinner-inline" id="spinner-match" style="display:none;"></div>
+            <span id="btn-match-text">Generar mi Ranking Top 5 de Posgrados</span>
           </button>
         </div>
       </form>
     </section>
 
-    <!-- ══ RESULTADO ═══════════════════════════════════════════════ -->
-    <section id="results-area">
-      <div class="module-card" style="padding: 2.5rem; border-top: 5px solid var(--c-blue-dark);">
+    <!-- ══ PASO 4: RESULTADOS TOP 5 RANKING ══════════════════════════ -->
+    <section id="sec-step-3" style="display:none;">
+      <div class="module-card" style="padding: 2.5rem; background: #fff; border-radius: 16px; border-top: 5px solid var(--c-blue-dark);">
+        
+        <h2 style="margin-bottom: 0.5rem; font-size: 2.1rem; color: var(--c-blue-dark);">Tu Ranking Top 5 de Posgrados UniSabana</h2>
+        <p id="r-sintesis" style="font-size: 1.05rem; line-height: 1.65; color: var(--text-secondary); background: rgba(0,19,91,0.03); border-left: 4px solid var(--c-blue-dark); padding: 1.25rem 1.5rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0 2.5rem;"></p>
 
-        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
-          <h2 style="margin:0;">Tu <em style="color:var(--c-blue-dark); opacity:0.65;">match</em> con el MPA</h2>
-          <div id="r-badges" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
+        <!-- Contenedor de las 5 Tarjetas -->
+        <div id="top5-container"></div>
+
+        <!-- Frase inspiracional final -->
+        <div id="r-frase-wrapper" style="background: var(--c-blue-dark); color: #fff; padding: 2rem; border-radius: 16px; text-align: center; margin-top: 2rem;">
+          <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 0.5rem; font-weight: 700;">Tu Futuro Profesional</p>
+          <p id="r-frase" style="font-family: var(--font-display); font-size: 1.3rem; font-style: italic; line-height: 1.4;"></p>
         </div>
 
-        <div
-          style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem; margin-bottom:2rem;">
-          <div>
-            <p class="result-section-title">Conexión con tu trayectoria</p>
-            <p class="result-text" id="r-conexion"></p>
-          </div>
-          <div>
-            <p class="result-section-title">Competencias que el MPA potencia</p>
-            <p class="result-text" id="r-competencias"></p>
-          </div>
-          <div>
-            <p class="result-section-title">Líneas académicas clave</p>
-            <p class="result-text" id="r-lineas"></p>
-          </div>
-          <div>
-            <p class="result-section-title">Proyección como graduado/a</p>
-            <p class="result-text" id="r-proyeccion"></p>
-          </div>
-        </div>
-
-        <!-- Frase potente final -->
-        <div class="frase-potente-wrapper" id="r-frase-wrapper" style="display:none;">
-          <p class="frase-potente-label">Tu oportunidad de crecimiento</p>
-          <p class="frase-potente-text" id="r-frase"></p>
-        </div>
-
-        <div class="text-center" style="margin-top:2rem;">
-          <button class="btn btn-outline btn-large" onclick="window.print()">Guardar análisis (PDF)</button>
+        <div class="text-center" style="margin-top: 2.5rem;">
+          <button class="btn btn-outline" onclick="window.print()">Descargar o Imprimir Ranking (PDF)</button>
         </div>
       </div>
     </section>
 
-    <!-- ══ PIE ═══════════════════════════════════════════════════════ -->
-    <p style="text-align:center; color:var(--text-muted); font-size:var(--fs-sm); margin-top:3rem; line-height:1.6;">
-      Este análisis es orientativo y se basa exclusivamente en la información oficial del MPA.<br>
-      No reemplaza el proceso de admisión ni implica decisiones de selección.<br><br>
-      ¿Tienes preguntas? Escríbenos a
-      <a href="mailto:escueladegobierno@unisabana.edu.co">escueladegobierno@unisabana.edu.co</a>
-    </p>
   </div>
 
   <script>
@@ -585,271 +345,363 @@
     const SUPABASE_ANON = 'sb_publishable_xYyfO7NMikgNZV2ithBYVA_mzBK6DlI';
     const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    const form = document.getElementById('match-form');
-    const btnSubmit = document.getElementById('btn-submit');
-    const btnText = document.getElementById('btn-text');
-    const spinner = document.getElementById('spinner');
-    const resultsArea = document.getElementById('results-area');
-    const errorMsg = document.getElementById('error-msg');
+    let cvFile = null;
+    let cvTextoExtraido = "";
+    let cvPathSupabase = null;
 
-    /* ── Drag & drop + extracción de texto de PDF con PDF.js ────── */
-    let cvTexto = "";
-    let cvFile = null;   // archivo original para subir a Supabase
+    /* ── PASO 1: LECTURA Y CARGA DE PDF ──────────────────────────── */
     const fileInput = document.getElementById('f-cv');
     const fileArea = document.getElementById('file-upload-area');
     const fileNameDisplay = document.getElementById('file-name-display');
-    const fileProcessing = document.getElementById('file-processing');
+    const parseLoading = document.getElementById('parse-loading');
+    const btnParseCv = document.getElementById('btn-parse-cv');
+    const errorStep1 = document.getElementById('error-step-1');
 
-    fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
-
-    fileArea.addEventListener('dragover', (e) => { e.preventDefault(); fileArea.classList.add('drag-over'); });
-    fileArea.addEventListener('dragleave', () => fileArea.classList.remove('drag-over'));
+    fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
+    fileArea.addEventListener('dragover', (e) => { e.preventDefault(); });
     fileArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      fileArea.classList.remove('drag-over');
-      handleFile(e.dataTransfer.files[0]);
+      handleFileSelect(e.dataTransfer.files[0]);
     });
 
-    async function handleFile(file) {
+    async function handleFileSelect(file) {
       if (!file) return;
-      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        showError('Por favor sube un archivo PDF.');
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        showErrorStep1('Por favor selecciona un archivo en formato PDF.');
         return;
       }
 
-      fileProcessing.style.display = 'flex';
-      fileNameDisplay.style.display = 'none';
-      cvTexto = '';
-      cvFile = null;
+      cvFile = file;
+      fileNameDisplay.textContent = '✓ ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+      fileNameDisplay.style.display = 'block';
+      errorStep1.style.display = 'none';
+
+      parseLoading.style.display = 'block';
+      btnParseCv.style.display = 'none';
 
       try {
-        console.log('[CV] Iniciando lectura del archivo:', file.name, `(${(file.size / 1024).toFixed(1)} KB)`);
-
-        // Guardar referencia al archivo para subirlo a Supabase al enviar
-        cvFile = file;
-
-        // Extraer texto con PDF.js
+        // Extraer texto del PDF con PDF.js
         const arrayBuffer = await file.arrayBuffer();
         const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
 
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        console.log('[CV] PDF cargado, páginas:', pdf.numPages);
-
         const pages = [];
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
           pages.push(content.items.map(item => item.str).join(' '));
         }
-        cvTexto = pages.join('\n\n');
-        console.log('[CV] Texto extraído, caracteres:', cvTexto.length);
+        cvTextoExtraido = pages.join('\n\n');
 
-        if (!cvTexto.trim()) {
-          console.warn('[CV] Texto vacío - PDF posiblemente escaneado. Se guardará igual.');
+        // Subir PDF a Supabase Storage en segundo plano
+        uploadCvToSupabase(file);
+
+        // Llamar a /api/parse-cv
+        const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+          ? '/api/parse-cv'
+          : 'https://alumni-chat.juandiegosotagui.workers.dev/';
+
+        const res = await fetch(targetUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'parse_cv', cvTexto: cvTextoExtraido })
+        });
+
+        const data = await res.json();
+        if (data.ok && data.data) {
+          populateStep2Form(data.data);
+          btnParseCv.style.display = 'inline-flex';
+        } else {
+          throw new Error(data.error || 'No se pudo estructurar el CV.');
         }
-
-        fileNameDisplay.textContent = '✓ ' + file.name + ' (' + pdf.numPages + ' pág.)';
-        fileNameDisplay.style.display = 'block';
       } catch (err) {
-        console.error('[CV] Error procesando PDF:', err);
-        cvFile = null;
-        cvTexto = '';
+        showErrorStep1('Ocurrió un aviso: ' + err.message + '. Puedes continuar y diligenciar manualmente.');
+        btnParseCv.style.display = 'inline-flex';
       } finally {
-        fileProcessing.style.display = 'none';
+        parseLoading.style.display = 'none';
       }
     }
 
-    /* ── Subir PDF a Supabase Storage ───────────────────────────── */
-    async function uploadCvToSupabase(file, cargo) {
-      if (!file) return null;
+    async function uploadCvToSupabase(file) {
       try {
-        const safeCargo = (cargo || 'aspirante').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 40);
-        const fileName = `CV_${safeCargo}_${Date.now()}.pdf`;
-        const { data, error } = await sbClient.storage
-          .from('hojas-de-vida')
-          .upload(fileName, file, { contentType: 'application/pdf', upsert: false });
-        if (error) {
-          console.error('[Supabase Storage] Error:', error.message);
-          return null;
+        const fileName = `CV_Alumni_${Date.now()}.pdf`;
+        const { data, error } = await sbClient.storage.from('hojas-de-vida').upload(fileName, file);
+        if (!error && data) {
+          cvPathSupabase = data.path;
         }
-        console.log('[Supabase Storage] PDF guardado en:', data.path);
-        return data.path;
-      } catch (err) {
-        console.error('[Supabase Storage] Excepción:', err);
-        return null;
-      }
+      } catch (e) {}
     }
 
-    /* ── Submit ─────────────────────────────────────────────────── */
-    form.addEventListener('submit', async (e) => {
+    function showErrorStep1(msg) {
+      errorStep1.textContent = msg;
+      errorStep1.style.display = 'block';
+    }
+
+    function processUploadedCV() {
+      document.getElementById('sec-step-1').style.display = 'none';
+      document.getElementById('sec-step-2').style.display = 'block';
+      document.getElementById('pill-step-1').className = 'step-pill completed';
+      document.getElementById('pill-step-2').className = 'step-pill active';
+      document.getElementById('pill-step-3').className = 'step-pill active';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── PASO 2: FORMULARIO DINÁMICO DE EXPERIENCIA Y FORMACIÓN ──── */
+    function populateStep2Form(extracted) {
+      if (extracted.nombre) document.getElementById('f-nombre').value = extracted.nombre;
+      if (extracted.email) document.getElementById('f-email').value = extracted.email;
+      if (extracted.telefono) document.getElementById('f-telefono').value = extracted.telefono;
+
+      const expContainer = document.getElementById('experiencias-container');
+      expContainer.innerHTML = '';
+      const experiencias = Array.isArray(extracted.experiencias) && extracted.experiencias.length ? extracted.experiencias : [{}];
+      experiencias.forEach(exp => addExperienciaBlock(exp));
+
+      const formContainer = document.getElementById('formaciones-container');
+      formContainer.innerHTML = '';
+      const formaciones = Array.isArray(extracted.formaciones) && extracted.formaciones.length ? extracted.formaciones : [{}];
+      formaciones.forEach(form => addFormacionBlock(form));
+    }
+
+    function addExperienciaBlock(data = {}) {
+      const container = document.getElementById('experiencias-container');
+      const box = document.createElement('div');
+      box.className = 'dynamic-item-box exp-item';
+      box.innerHTML = `
+        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕ Eliminar</button>
+        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+          <div class="field">
+            <label>Cargo / Rol</label>
+            <input type="text" class="exp-cargo" value="${data.cargo || ''}" required placeholder="Ej: Coordinador de Proyectos">
+          </div>
+          <div class="field">
+            <label>Empresa / Institución</label>
+            <input type="text" class="exp-empresa" value="${data.empresa || ''}" required placeholder="Ej: Gobernación de Cundinamarca">
+          </div>
+        </div>
+        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+          <div class="field">
+            <label>Fecha Inicio</label>
+            <input type="text" class="exp-inicio" value="${data.fecha_inicio || ''}" placeholder="Ej: 2021 o Ene 2021">
+          </div>
+          <div class="field">
+            <label>Fecha Fin</label>
+            <input type="text" class="exp-fin" value="${data.fecha_fin || ''}" placeholder="Ej: 2024 o Actualidad">
+          </div>
+        </div>
+        <div style="margin-bottom:0.8rem;">
+          <label style="font-size:0.85rem; cursor:pointer;">
+            <input type="checkbox" class="exp-actual" ${data.actualmente ? 'checked' : ''}> Trabaja aquí actualmente
+          </label>
+        </div>
+        <div class="field" style="margin-bottom:0.8rem;">
+          <label>Funciones Principales</label>
+          <textarea class="exp-funciones" style="min-height:70px;" placeholder="Resumen de responsabilidades...">${data.funciones || ''}</textarea>
+        </div>
+        <div class="field">
+          <label>Logros Destacados</label>
+          <textarea class="exp-logros" style="min-height:70px;" placeholder="Principales resultados u objetivos alcanzados...">${data.logros || ''}</textarea>
+        </div>
+      `;
+      container.appendChild(box);
+    }
+
+    function addFormacionBlock(data = {}) {
+      const container = document.getElementById('formaciones-container');
+      const box = document.createElement('div');
+      box.className = 'dynamic-item-box form-item';
+
+      const tipos = ["Curso informal", "Diplomado", "Técnico", "Tecnólogo", "Pregrado", "Posgrado", "Doctorado", "Estudio post-doctoral"];
+      const optionsHtml = tipos.map(t => `<option ${data.tipo === t ? 'selected' : ''}>${t}</option>`).join('');
+
+      box.innerHTML = `
+        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕ Eliminar</button>
+        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+          <div class="field">
+            <label>Tipo de Formación</label>
+            <select class="form-tipo" required>${optionsHtml}</select>
+          </div>
+          <div class="field">
+            <label>Programa / Título</label>
+            <input type="text" class="form-programa" value="${data.programa || ''}" required placeholder="Ej: Ingeniería Industrial / Diplomado en IA">
+          </div>
+        </div>
+        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+          <div class="field">
+            <label>Institución</label>
+            <input type="text" class="form-institucion" value="${data.institucion || ''}" placeholder="Ej: Universidad de La Sabana">
+          </div>
+          <div class="field">
+            <label>Fecha Inicio</label>
+            <input type="text" class="form-inicio" value="${data.fecha_inicio || ''}" placeholder="Ej: 2018">
+          </div>
+          <div class="field">
+            <label>Fecha Fin</label>
+            <input type="text" class="form-fin" value="${data.fecha_fin || ''}" placeholder="Ej: 2023">
+          </div>
+        </div>
+      `;
+      container.appendChild(box);
+    }
+
+    /* ── SUBMIT FINAL DE RANKING TOP 5 ───────────────────────────── */
+    const fullForm = document.getElementById('full-profile-form');
+    const btnSubmitMatch = document.getElementById('btn-submit-match');
+    const spinnerMatch = document.getElementById('spinner-match');
+    const btnMatchText = document.getElementById('btn-match-text');
+    const errorStep2 = document.getElementById('error-step-2');
+
+    fullForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      errorMsg.style.display = 'none';
+      errorStep2.style.display = 'none';
 
-      const cargo = document.getElementById('f-cargo').value.trim();
-      const experiencia = document.getElementById('f-experiencia').value.trim();
-      const motivacion = document.getElementById('f-motivacion').value.trim();
-      const consent = document.getElementById('f-consent').checked;
-
-      if (!experiencia && !motivacion) {
-        showError('Por favor comparte al menos tu experiencia profesional o tu motivación para el MPA.');
-        return;
-      }
-      if (!consent) {
-        showError('Debes aceptar el tratamiento de datos personales para continuar.');
-        return;
-      }
-
-      btnSubmit.disabled = true;
-      spinner.style.display = 'block';
-      resultsArea.style.display = 'none';
-
-      // Paso 1: subir PDF a Supabase (si hay uno)
-      let cvPath = null;
-      if (cvFile) {
-        btnText.textContent = 'Guardando hoja de vida...';
-        cvPath = await uploadCvToSupabase(cvFile, cargo);
-      }
-
-      // Paso 2: llamar al Worker con los metadatos
-      btnText.textContent = 'Analizando tu perfil...';
-
-      const payload = {
-        nombre: document.getElementById('f-nombre').value.trim() || null,
-        email: document.getElementById('f-email').value.trim() || null,
-        telefono: document.getElementById('f-telefono').value.trim() || null,
-        cargo,
-        sector: document.getElementById('f-sector').value,
-        anos: document.getElementById('f-anos').value,
-        edad: document.getElementById('f-edad').value,
-        formacion: document.getElementById('f-formacion').value,
-        institucion: document.getElementById('f-institucion').value,
-        intereses: document.getElementById('f-intereses').value,
-        experiencia,
-        motivacion,
-        cvTexto: cvTexto || undefined,
-        cvPath: cvPath || undefined,
-      };
-
-      console.log('[SUBMIT] Payload:', {
-        cargo: payload.cargo,
-        cvTextoLen: (payload.cvTexto || '').length,
-        cvPath: payload.cvPath,
+      // Recopilar experiencias
+      const expBoxes = document.querySelectorAll('.exp-item');
+      const experiencias = [];
+      expBoxes.forEach(box => {
+        experiencias.push({
+          cargo: box.querySelector('.exp-cargo').value.trim(),
+          empresa: box.querySelector('.exp-empresa').value.trim(),
+          fecha_inicio: box.querySelector('.exp-inicio').value.trim(),
+          fecha_fin: box.querySelector('.exp-fin').value.trim(),
+          actualmente: box.querySelector('.exp-actual').checked,
+          funciones: box.querySelector('.exp-funciones').value.trim(),
+          logros: box.querySelector('.exp-logros').value.trim(),
+        });
       });
 
+      // Recopilar formaciones
+      const formBoxes = document.querySelectorAll('.form-item');
+      const formaciones = [];
+      formBoxes.forEach(box => {
+        formaciones.push({
+          tipo: box.querySelector('.form-tipo').value,
+          programa: box.querySelector('.form-programa').value.trim(),
+          institucion: box.querySelector('.form-institucion').value.trim(),
+          fecha_inicio: box.querySelector('.form-inicio').value.trim(),
+          fecha_fin: box.querySelector('.form-fin').value.trim(),
+        });
+      });
+
+      const payload = {
+        action: 'match_top5',
+        nombre: document.getElementById('f-nombre').value.trim(),
+        email: document.getElementById('f-email').value.trim(),
+        telefono: document.getElementById('f-telefono').value.trim(),
+        edad: document.getElementById('f-edad').value,
+        experiencias,
+        formaciones,
+        planes_5_anos: document.getElementById('f-planes-5anos').value.trim(),
+        expectativas_posgrado: document.getElementById('f-expectativas').value.trim(),
+        cvPath: cvPathSupabase || null,
+      };
+
+      btnSubmitMatch.disabled = true;
+      spinnerMatch.style.display = 'inline-block';
+      btnMatchText.textContent = 'Analizando Top 5 con Inteligencia Artificial...';
+
       try {
-        const res = await fetch('https://mpa-match.juandiegosotagui.workers.dev/', {
+        const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+          ? '/api/match'
+          : 'https://alumni-chat.juandiegosotagui.workers.dev/';
+
+        const res = await fetch(targetUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
         const data = await res.json();
-
-        if (data.ok) {
-          renderResults(data.result);
+        if (data.ok && data.result) {
+          renderTop5Results(data.result);
         } else {
-          throw new Error(data.error || `Error ${res.status}`);
+          throw new Error(data.error || 'Error generando el Ranking.');
         }
       } catch (err) {
-        showError('Ocurrió un error: ' + err.message + '. Por favor intenta de nuevo.');
+        errorStep2.textContent = 'Ocurrió un error: ' + err.message;
+        errorStep2.style.display = 'block';
       } finally {
-        btnSubmit.disabled = false;
-        spinner.style.display = 'none';
-        btnText.textContent = 'Analizar mi perfil match';
+        btnSubmitMatch.disabled = false;
+        spinnerMatch.style.display = 'none';
+        btnMatchText.textContent = 'Generar mi Ranking Top 5 de Posgrados';
       }
     });
 
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
-    }
+    /* ── RENDERIZAR RESULTADOS TOP 5 ─────────────────────────────── */
+    function renderTop5Results(res) {
+      document.getElementById('sec-step-2').style.display = 'none';
+      document.getElementById('sec-step-3').style.display = 'block';
+      document.getElementById('pill-step-2').className = 'step-pill completed';
+      document.getElementById('pill-step-3').className = 'step-pill completed';
+      document.getElementById('pill-step-4').className = 'step-pill active';
 
-    function renderResults(res) {
-      document.getElementById('r-conexion').textContent = res.conexion || '';
-      document.getElementById('r-competencias').textContent = res.competencias || '';
-      document.getElementById('r-lineas').textContent = res.lineas || '';
-      document.getElementById('r-proyeccion').textContent = res.proyeccion || '';
+      document.getElementById('r-sintesis').textContent = res.sintesis_perfil || '';
 
-      const badges = document.getElementById('r-badges');
-      badges.innerHTML = '';
-      let perfilArray = [];
-      if (Array.isArray(res.perfil_dominante)) {
-        perfilArray = res.perfil_dominante;
-      } else if (typeof res.perfil_dominante === 'string') {
-        perfilArray = res.perfil_dominante.split(',').map(p => p.trim()).filter(Boolean);
-      }
-      perfilArray.forEach(p => {
-        const b = document.createElement('span');
-        b.className = 'chip';
-        b.style.background = 'var(--c-blue-dark)';
-        b.style.color = '#fff';
-        b.style.borderColor = 'transparent';
-        b.textContent = p;
-        badges.appendChild(b);
+      const container = document.getElementById('top5-container');
+      container.innerHTML = '';
+
+      const top5 = Array.isArray(res.top_5) ? res.top_5 : [];
+
+      top5.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'top5-card';
+
+        const score = item.puntaje_match || 80;
+        const rankingNum = item.ranking || (index + 1);
+        const urlBtn = item.url ? `<a href="${item.url}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:1.25rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;">Ver programa oficial en UniSabana ↗</a>` : '';
+
+        card.innerHTML = `
+          <div class="top5-header">
+            <div>
+              <span class="match-tag">#${rankingNum} Posgrado Recomendado</span>
+              <h3 style="font-family:var(--font-display); font-size:1.4rem; color:var(--c-blue-dark); margin-top:0.25rem;">
+                ${item.nombre_programa || 'Programa de Posgrado'}
+              </h3>
+              <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.2rem;">
+                🏛️ ${item.facultad || 'Universidad de La Sabana'} &middot; 📍 ${item.modalidad || 'Presencial / Híbrida'}
+              </p>
+            </div>
+            <div class="score-badge">
+              <span>🎯 Match ${score}/100</span>
+            </div>
+          </div>
+
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width: ${score}%;"></div>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">🎯 Justificación del Match</div>
+            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.justificacion || ''}</p>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">🚀 Impacto a 5 Años en tu Carrera y Desarrollo Personal</div>
+            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.impacto_laboral_y_personal || ''}</p>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">💡 Competencias Clave a Potenciar</div>
+            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.competencias_clave || ''}</p>
+          </div>
+
+          ${urlBtn}
+        `;
+        container.appendChild(card);
       });
 
-      // Frase potente
       const fraseWrapper = document.getElementById('r-frase-wrapper');
       const fraseEl = document.getElementById('r-frase');
-      if (res.frase_potente) {
-        fraseEl.textContent = res.frase_potente;
+      if (res.frase_inspiracional) {
+        fraseEl.textContent = res.frase_inspiracional;
         fraseWrapper.style.display = 'block';
       } else {
         fraseWrapper.style.display = 'none';
       }
 
-      resultsArea.style.display = 'block';
-      resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    /* ── Ctrl+M → Rellenar con ejemplo ────────────────────────── */
-    const EJEMPLO = {
-      nombre: "Laura Camila Mora Ospina",
-      email: "Lauram.ospina@ejemplo.com",
-      telefono: "+57 310 555 7890",
-      cargo: "Coordinadora de Proyectos Sociales",
-      sector: "Gobierno territorial (gobernación / municipio)",
-      anos: "5 a 10 años",
-      edad: "31 a 35 años",
-      formacion: "Especialización",
-      institucion: "Universidad de los Andes",
-      intereses: "innovación pública, gestión territorial, política social",
-      experiencia: "He liderado equipos multidisciplinarios en el diseño e implementación de proyectos sociales en 12 municipios de Cundinamarca. Formulé un programa de inclusión productiva que benefició a 800 familias en situación de vulnerabilidad, articulando recursos de la gobernación con cooperación internacional.",
-      motivacion: "Quiero tomar decisiones de política pública con mayor rigor técnico y evidencia. Me interesa aprender a diseñar programas que realmente transformen los territorios donde trabajo."
-    };
-    document.addEventListener("keydown", function (e) {
-      if (e.ctrlKey && e.key === "m") {
-        e.preventDefault();
-        document.getElementById("f-nombre").value = EJEMPLO.nombre;
-        document.getElementById("f-email").value = EJEMPLO.email;
-        document.getElementById("f-telefono").value = EJEMPLO.telefono;
-        document.getElementById("f-cargo").value = EJEMPLO.cargo;
-        document.getElementById("f-intereses").value = EJEMPLO.intereses;
-        document.getElementById("f-experiencia").value = EJEMPLO.experiencia;
-        document.getElementById("f-motivacion").value = EJEMPLO.motivacion;
-        document.getElementById("f-institucion").value = EJEMPLO.institucion;
-        document.getElementById("f-consent").checked = true;
-
-        const selSector = document.getElementById("f-sector");
-        for (let i = 0; i < selSector.options.length; i++) {
-          if (selSector.options[i].text === EJEMPLO.sector) { selSector.selectedIndex = i; break; }
-        }
-        const selAnos = document.getElementById("f-anos");
-        for (let i = 0; i < selAnos.options.length; i++) {
-          if (selAnos.options[i].text === EJEMPLO.anos) { selAnos.selectedIndex = i; break; }
-        }
-        const selEdad = document.getElementById("f-edad");
-        for (let i = 0; i < selEdad.options.length; i++) {
-          if (selEdad.options[i].text === EJEMPLO.edad) { selEdad.selectedIndex = i; break; }
-        }
-        const selFormacion = document.getElementById("f-formacion");
-        for (let i = 0; i < selFormacion.options.length; i++) {
-          if (selFormacion.options[i].text === EJEMPLO.formacion) { selFormacion.selectedIndex = i; break; }
-        }
-      }
-    });
   </script>
 
 </body>
