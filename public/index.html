@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
     rel="stylesheet">
 
   <!-- Supabase JS SDK -->
@@ -30,133 +30,323 @@
       font-display: swap;
     }
 
-    .step-indicator {
+    /* ── WIZARD DE PASOS ELEGANTE ─────────────────────────────────── */
+    .wizard-steps {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .step-pill {
-      background: rgba(0, 19, 91, 0.06);
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1.1rem;
+      border-radius: 50px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      padding: 0.4rem 0.9rem;
-      border-radius: 999px;
-      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: all 0.25s ease;
     }
 
-    .step-pill.active {
+    .wizard-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .wizard-step.active {
       background: var(--c-blue-dark);
-      color: #fff;
+      color: #ffffff;
+      border-color: var(--c-blue-dark);
+      box-shadow: 0 4px 12px rgba(0, 19, 91, 0.2);
     }
 
-    .step-pill.completed {
-      background: rgba(0, 19, 91, 0.15);
+    .wizard-step.active .wizard-step-num {
+      background: #ffffff;
       color: var(--c-blue-dark);
     }
 
-    .dynamic-item-box {
-      background: #f8fafc;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.25rem;
+    .wizard-step.completed {
+      background: #eff6ff;
+      color: var(--c-blue-dark);
+      border-color: #bfdbfe;
+    }
+
+    .wizard-step.completed .wizard-step-num {
+      background: var(--c-blue-dark);
+      color: #ffffff;
+    }
+
+    .wizard-divider {
+      flex: 1;
+      height: 2px;
+      background: var(--border-color);
+      max-width: 30px;
+    }
+
+    /* ── TARJETAS Y FORMULARIOS ──────────────────────────────────── */
+    .form-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--c-blue-dark);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .form-card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
       margin-bottom: 1rem;
+    }
+
+    .field label {
+      font-family: var(--font-main);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="tel"],
+    .field select,
+    .field textarea {
+      font-family: var(--font-main);
+      font-size: 0.92rem;
+      color: var(--text-primary);
+      background-color: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      background-color: #ffffff;
+      border-color: var(--c-blue-dark);
+      box-shadow: 0 0 0 4px rgba(0, 19, 91, 0.08);
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.6;
+    }
+
+    /* ── BLOQUES DINÁMICOS ────────────────────────────────────────── */
+    .dynamic-item-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--c-blue-dark);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
       position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .dynamic-item-card:hover {
+      box-shadow: 0 6px 16px rgba(0, 19, 91, 0.06);
     }
 
     .btn-remove-item {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: #fee2e2;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: #fef2f2;
       color: #dc2626;
-      border: none;
+      border: 1px solid #fecaca;
       border-radius: 6px;
-      padding: 0.25rem 0.6rem;
+      padding: 0.35rem 0.75rem;
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s;
     }
 
     .btn-remove-item:hover {
-      background: #fca5a5;
+      background: #fee2e2;
+      color: #b91c1c;
     }
 
     .btn-add-item {
-      background: rgba(0, 19, 91, 0.05);
+      background: rgba(0, 19, 91, 0.04);
       color: var(--c-blue-dark);
-      border: 1px dashed var(--c-blue-dark);
-      border-radius: 8px;
-      padding: 0.6rem 1.2rem;
-      font-weight: 600;
-      font-size: 0.85rem;
+      border: 2px dashed rgba(0, 19, 91, 0.25);
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      font-size: 0.88rem;
       width: 100%;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
       margin-bottom: 1.5rem;
     }
 
     .btn-add-item:hover {
-      background: rgba(0, 19, 91, 0.10);
+      background: rgba(0, 19, 91, 0.08);
+      border-color: var(--c-blue-dark);
     }
 
-    /* Tarjetas del Ranking Top 5 */
+    /* ── TARJETAS TOP 5 RANKING ──────────────────────────────────── */
     .top5-card {
-      background: #fff;
+      background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 4px 16px rgba(0, 19, 91, 0.06);
+      padding: 2.25rem;
+      box-shadow: 0 4px 20px rgba(0, 19, 91, 0.06);
       margin-bottom: 2rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .top5-card:hover {
+      box-shadow: 0 8px 30px rgba(0, 19, 91, 0.12);
     }
 
     .top5-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 1.25rem;
       flex-wrap: wrap;
       margin-bottom: 1rem;
     }
 
-    .score-badge {
-      background: #e0e7ff;
-      color: #3730a3;
-      font-size: 1.1rem;
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--c-blue-dark);
+      color: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+
+    .score-chip {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+      font-size: 1.05rem;
       font-weight: 800;
-      padding: 0.4rem 1rem;
+      padding: 0.4rem 1.1rem;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
 
-    .score-bar-bg {
+    .score-progress-bg {
       height: 8px;
-      background: #e2e8f0;
+      background: #f1f5f9;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
+      border: 1px solid #e2e8f0;
     }
 
-    .score-bar-fill {
+    .score-progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+      background: linear-gradient(90deg, #2563eb, #1d4ed8);
       border-radius: 999px;
-      transition: width 1s ease-in-out;
     }
 
-    .match-tag {
-      display: inline-block;
-      background: var(--c-blue-dark);
-      color: #fff;
+    .section-detail-box {
+      margin-bottom: 1.25rem;
+    }
+
+    .section-detail-title {
+      font-size: 0.82rem;
       font-weight: 700;
-      font-size: 0.8rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--c-blue-dark);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .section-detail-text {
+      font-size: 0.94rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .icon-svg {
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid-2, .form-grid-3 {
+        grid-template-columns: 1fr;
+      }
+      .wizard-steps {
+        gap: 0.35rem;
+      }
+      .wizard-step {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.75rem;
+      }
+      .wizard-divider {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -164,61 +354,99 @@
 <body>
 
   <!-- ══ NAVBAR ══════════════════════════════════════════════════════ -->
-  <nav id="navbar" style="background: var(--c-blue-dark); padding: 1.1rem 2rem;">
-    <div class="nav-container" style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-      <span style="color: #fff; font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;">
-        AlumniChat
-      </span>
+  <nav id="navbar" style="background: var(--c-blue-dark); padding: 1.1rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <svg class="icon-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        <span style="color: #ffffff; font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em;">
+          AlumniChat
+        </span>
+      </div>
       <span style="color: rgba(255,255,255,0.75); font-size: 0.85rem; font-weight: 500;">
-        Orientador de Posgrados UniSabana
+        Universidad de La Sabana &middot; Posgrados
       </span>
     </div>
   </nav>
 
   <!-- ══ HERO ═══════════════════════════════════════════════════════ -->
-  <header class="match-hero" style="background: var(--c-blue-dark); color: #fff; padding: 3.5rem 2rem; text-align: center;">
-    <h1 style="color:#fff; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.15; margin-bottom: 1rem;">
-      Descubre tu posgrado ideal.<br><em>Construye tu Top 5 con Inteligencia Artificial</em>
+  <header style="background: linear-gradient(135deg, #00135B 0%, #00248a 100%); color: #ffffff; padding: 3.5rem 2rem 4rem; text-align: center;">
+    <h1 style="color:#ffffff; font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.18; margin-bottom: 1rem;">
+      Descubre tu posgrado ideal.<br><em style="font-style:italic; opacity:0.88;">Construye tu Top 5 con Inteligencia Artificial</em>
     </h1>
-    <p style="font-size: 1.05rem; opacity: 0.85; max-width: 700px; margin: 0 auto;">
-      Sube tu Hoja de Vida en PDF. Extraeremos tu perfil automáticamente y analizaremos los más de 140 posgrados de la Universidad de La Sabana para entregarte tu Ranking Top 5 personalizado.
+    <p style="font-size: 1.08rem; opacity: 0.88; max-width: 720px; margin: 0 auto; line-height: 1.6;">
+      Sube tu Hoja de Vida en PDF. Extraeremos tu perfil automáticamente y analizaremos la oferta de más de 140 posgrados de la Universidad de La Sabana para entregarte tu Ranking Top 5 personalizado.
     </p>
   </header>
 
   <!-- ══ CONTENIDO PRINCIPAL ═════════════════════════════════════════ -->
-  <div class="match-body" style="max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem;">
+  <div style="max-width: 920px; margin: -2rem auto 5rem; padding: 0 1.5rem; position: relative; z-index: 10;">
 
-    <!-- Indicador de pasos -->
-    <div class="step-indicator">
-      <div class="step-pill active" id="pill-step-1">1. Cargar Hoja de Vida</div>
-      <div class="step-pill" id="pill-step-2">2. Confirmar Perfil Extraído</div>
-      <div class="step-pill" id="pill-step-3">3. Proyección a 5 Años</div>
-      <div class="step-pill" id="pill-step-4">4. Ranking Top 5</div>
+    <!-- Wizard de Pasos -->
+    <div class="wizard-steps">
+      <div class="wizard-step active" id="pill-step-1">
+        <span class="wizard-step-num">1</span>
+        <span>Cargar PDF</span>
+      </div>
+      <div class="wizard-divider"></div>
+      <div class="wizard-step" id="pill-step-2">
+        <span class="wizard-step-num">2</span>
+        <span>Perfil Extraído</span>
+      </div>
+      <div class="wizard-divider"></div>
+      <div class="wizard-step" id="pill-step-3">
+        <span class="wizard-step-num">3</span>
+        <span>Proyección a 5 Años</span>
+      </div>
+      <div class="wizard-divider"></div>
+      <div class="wizard-step" id="pill-step-4">
+        <span class="wizard-step-num">4</span>
+        <span>Ranking Top 5</span>
+      </div>
     </div>
 
     <!-- ══ PASO 1: SUBIR HOJA DE VIDA ════════════════════════════════ -->
-    <section id="sec-step-1" class="module-card" style="padding: 2.5rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color);">
-      <h2 style="margin-bottom: 0.25rem;">Paso 1: Sube tu Hoja de Vida (PDF)</h2>
-      <p class="section-subtitle" style="margin-bottom: 2rem; color: var(--text-muted);">
-        Para comenzar, adjunta tu CV en formato PDF. Nuestro sistema estructurará tu historia laboral y académica en segundos.
+    <section id="sec-step-1" class="module-card" style="padding: 2.75rem; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow);">
+      
+      <div class="form-card-title">
+        <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span>Paso 1: Sube tu Hoja de Vida (PDF)</span>
+      </div>
+      <p class="form-card-subtitle">
+        Adjunta tu CV en formato PDF. Nuestro sistema estructurará tu trayectoria laboral y académica automáticamente antes de evaluar las recomendaciones.
       </p>
 
-      <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-cv').click()"
-        style="border: 2px dashed var(--c-blue-dark); border-radius: 14px; padding: 2.5rem; text-align: center; cursor: pointer; background: rgba(0,19,91,0.02);">
+      <div id="file-upload-area" onclick="document.getElementById('f-cv').click()"
+        style="border: 2px dashed var(--c-blue-dark); border-radius: 16px; padding: 3rem 2rem; text-align: center; cursor: pointer; background: rgba(0, 19, 91, 0.02); transition: all 0.2s ease;">
         <input type="file" id="f-cv" accept="application/pdf,.pdf" style="display:none;">
-        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">📄</span>
-        <div style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+        
+        <div style="width:64px; height:64px; background:#eff6ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 1.25rem;">
+          <svg class="icon-svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+
+        <div style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.4rem; font-weight: 600;">
           <strong style="color: var(--c-blue-dark);">Haz clic para seleccionar tu Hoja de Vida (PDF)</strong> o arrástrala aquí
         </div>
-        <div id="file-name-display" style="font-weight: 700; color: var(--c-blue-dark); display: none;"></div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Formatos permitidos: .PDF (máx. 10MB)</p>
+        
+        <div id="file-name-display" style="font-weight: 700; color: var(--c-blue-dark); display: none; margin-top: 1rem; font-size: 0.95rem;"></div>
       </div>
 
       <div id="parse-loading" style="display:none; text-align:center; padding: 2rem 0;">
-        <div class="spinner-inline" style="width:24px; height:24px; border:3px solid rgba(0,19,91,0.2); border-top-color:var(--c-blue-dark); border-radius:50%; animation:spin 0.7s linear infinite; margin: 0 auto 0.75rem;"></div>
-        <p style="color: var(--c-blue-dark); font-weight: 600;">Leyendo y extrayendo tu experiencia laboral y académica con Inteligencia Artificial...</p>
+        <div class="spinner-inline" style="width:28px; height:28px; border:3px solid rgba(0,19,91,0.18); border-top-color:var(--c-blue-dark); border-radius:50%; animation:spin 0.7s linear infinite; margin: 0 auto 1rem;"></div>
+        <p style="color: var(--c-blue-dark); font-weight: 700; font-size: 0.95rem;">Extrayendo experiencia laboral y estudios con Inteligencia Artificial...</p>
       </div>
 
-      <div id="error-step-1" style="display:none; margin-top:1rem; background:#fee2e2; border:1px solid #fca5a5; padding:0.75rem; border-radius:8px; color:#991b1b; font-size:0.9rem;"></div>
+      <div id="error-step-1" style="display:none; margin-top:1.25rem; background:#fef2f2; border:1px solid #fecaca; padding:0.85rem 1rem; border-radius:10px; color:#991b1b; font-size:0.9rem;"></div>
 
       <div class="text-center" style="margin-top: 2rem;">
         <button class="btn btn-giant-primary" id="btn-parse-cv" onclick="processUploadedCV()" style="display:none;">
@@ -232,20 +460,28 @@
       <form id="full-profile-form">
         
         <!-- Bloque Datos Básicos -->
-        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 1.25rem; color: var(--c-blue-dark);">1. Datos Personales</h3>
-          <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+        <div style="padding: 2.25rem; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 2rem;">
+          <div class="form-card-title">
+            <svg class="icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>1. Datos Personales</span>
+          </div>
+          <p class="form-card-subtitle">Verifica tus datos de contacto.</p>
+
+          <div class="form-grid-2">
             <div class="field">
               <label for="f-nombre">Nombre completo</label>
-              <input type="text" id="f-nombre" required>
+              <input type="text" id="f-nombre" required placeholder="Ej: María Fernanda Ospina">
             </div>
             <div class="field">
               <label for="f-email">Correo electrónico</label>
-              <input type="email" id="f-email" required>
+              <input type="email" id="f-email" required placeholder="Ej: mariaf@correo.com">
             </div>
             <div class="field">
               <label for="f-telefono">Teléfono de contacto</label>
-              <input type="tel" id="f-telefono">
+              <input type="tel" id="f-telefono" placeholder="Ej: +57 310 123 4567">
             </div>
             <div class="field">
               <label for="f-edad">Rango de edad</label>
@@ -263,27 +499,59 @@
         </div>
 
         <!-- Bloque Experiencia Laboral Dinámica -->
-        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">2. Experiencia Laboral</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Confirma o ajusta los roles laborales extraídos de tu Hoja de Vida.</p>
+        <div style="padding: 2.25rem; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 2rem;">
+          <div class="form-card-title">
+            <svg class="icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+            <span>2. Experiencia Laboral</span>
+          </div>
+          <p class="form-card-subtitle">Confirma o ajusta los roles laborales extraídos de tu Hoja de Vida.</p>
 
           <div id="experiencias-container"></div>
-          <button type="button" class="btn-add-item" onclick="addExperienciaBlock()">+ Agregar otra experiencia laboral</button>
+
+          <button type="button" class="btn-add-item" onclick="addExperienciaBlock()">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Agregar otra experiencia laboral</span>
+          </button>
         </div>
 
         <!-- Bloque Formación Académica Dinámica -->
-        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">3. Formación Académica</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Confirma tu historial de estudios (grados, títulos, especializaciones, diplomados, etc.).</p>
+        <div style="padding: 2.25rem; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 2rem;">
+          <div class="form-card-title">
+            <svg class="icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            <span>3. Formación Académica</span>
+          </div>
+          <p class="form-card-subtitle">Confirma tu historial de estudios (títulos, diplomados, posgrados, etc.).</p>
 
           <div id="formaciones-container"></div>
-          <button type="button" class="btn-add-item" onclick="addFormacionBlock()">+ Agregar otra formación académica</button>
+
+          <button type="button" class="btn-add-item" onclick="addFormacionBlock()">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Agregar otra formación académica</span>
+          </button>
         </div>
 
         <!-- Bloque Proyección Estratégica -->
-        <div class="module-card" style="padding: 2rem; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 2rem;">
-          <h3 style="margin-bottom: 0.5rem; color: var(--c-blue-dark);">4. Proyección Profesional y Metas</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.5rem;">Cuéntanos tus aspiraciones para personalizar tu Top 5.</p>
+        <div style="padding: 2.25rem; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 2rem;">
+          <div class="form-card-title">
+            <svg class="icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+            </svg>
+            <span>4. Proyección Profesional y Metas</span>
+          </div>
+          <p class="form-card-subtitle">Cuéntanos tus aspiraciones para personalizar tu Top 5 de posgrados.</p>
 
           <div class="field" style="margin-bottom: 1.5rem;">
             <label for="f-planes-5anos">¿Cuáles son tus planes laborales en los próximos cinco años?</label>
@@ -292,19 +560,19 @@
 
           <div class="field">
             <label for="f-expectativas">¿Qué esperas conseguir con un posgrado de la Universidad de La Sabana?</label>
-            <textarea id="f-expectativas" required placeholder="Ej: Desarrollar competencias en toma de decisiones estratégicas, ampliar red de contactos, dominar herramientas de innovación..."></textarea>
+            <textarea id="f-expectativas" required placeholder="Ej: Desarrollar capacidades avanzadas de toma de decisiones basadas en evidencia, ampliar red de contactos, dominar herramientas estratégicas..."></textarea>
           </div>
         </div>
 
         <!-- Consentimiento -->
-        <div class="consent-box" style="background: rgba(0, 19, 91, 0.05); border: 1px solid rgba(0, 19, 91, 0.18); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.75rem;">
-          <input type="checkbox" id="f-consent" required style="margin-top:0.25rem;">
-          <label for="f-consent" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
-            Acepto el <strong>tratamiento de mis datos personales</strong> por la Universidad de La Sabana para efectos de orientación académica y guardado de mi perfil.
+        <div style="background: rgba(0, 19, 91, 0.04); border: 1px solid rgba(0, 19, 91, 0.15); border-radius: 12px; padding: 1.1rem 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 0.85rem; align-items: flex-start;">
+          <input type="checkbox" id="f-consent" required style="margin-top:0.25rem; width:18px; height:18px; cursor:pointer;">
+          <label for="f-consent" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; cursor:pointer;">
+            Acepto el <strong>tratamiento de mis datos personales</strong> por parte de la Universidad de La Sabana para efectos de orientación académica y guardado de mi perfil.
           </label>
         </div>
 
-        <div id="error-step-2" style="display:none; margin-bottom:1rem; background:#fee2e2; border:1px solid #fca5a5; padding:0.75rem; border-radius:8px; color:#991b1b; font-size:0.9rem;"></div>
+        <div id="error-step-2" style="display:none; margin-bottom:1.25rem; background:#fef2f2; border:1px solid #fecaca; padding:0.85rem; border-radius:10px; color:#991b1b; font-size:0.9rem;"></div>
 
         <div class="text-center">
           <button type="submit" class="btn btn-giant-primary" id="btn-submit-match" style="display:inline-flex; align-items:center; gap:0.75rem;">
@@ -317,22 +585,29 @@
 
     <!-- ══ PASO 4: RESULTADOS TOP 5 RANKING ══════════════════════════ -->
     <section id="sec-step-3" style="display:none;">
-      <div class="module-card" style="padding: 2.5rem; background: #fff; border-radius: 16px; border-top: 5px solid var(--c-blue-dark);">
+      <div style="padding: 2.75rem; background: #ffffff; border-radius: 16px; border-top: 6px solid var(--c-blue-dark); box-shadow: var(--shadow);">
         
-        <h2 style="margin-bottom: 0.5rem; font-size: 2.1rem; color: var(--c-blue-dark);">Tu Ranking Top 5 de Posgrados UniSabana</h2>
+        <h2 style="margin-bottom: 0.4rem; font-size: 2.2rem; color: var(--c-blue-dark);">Tu Ranking Top 5 de Posgrados UniSabana</h2>
         <p id="r-sintesis" style="font-size: 1.05rem; line-height: 1.65; color: var(--text-secondary); background: rgba(0,19,91,0.03); border-left: 4px solid var(--c-blue-dark); padding: 1.25rem 1.5rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0 2.5rem;"></p>
 
         <!-- Contenedor de las 5 Tarjetas -->
         <div id="top5-container"></div>
 
         <!-- Frase inspiracional final -->
-        <div id="r-frase-wrapper" style="background: var(--c-blue-dark); color: #fff; padding: 2rem; border-radius: 16px; text-align: center; margin-top: 2rem;">
-          <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 0.5rem; font-weight: 700;">Tu Futuro Profesional</p>
-          <p id="r-frase" style="font-family: var(--font-display); font-size: 1.3rem; font-style: italic; line-height: 1.4;"></p>
+        <div id="r-frase-wrapper" style="background: linear-gradient(135deg, #00135B 0%, #00248a 100%); color: #ffffff; padding: 2.25rem; border-radius: 16px; text-align: center; margin-top: 2rem;">
+          <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 0.5rem; font-weight: 700;">Tu Futuro Profesional</p>
+          <p id="r-frase" style="font-family: var(--font-display); font-size: 1.35rem; font-style: italic; line-height: 1.4;"></p>
         </div>
 
         <div class="text-center" style="margin-top: 2.5rem;">
-          <button class="btn btn-outline" onclick="window.print()">Descargar o Imprimir Ranking (PDF)</button>
+          <button class="btn btn-outline" onclick="window.print()" style="display:inline-flex; align-items:center; gap:0.5rem;">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            <span>Descargar o Imprimir Ranking (PDF)</span>
+          </button>
         </div>
       </div>
     </section>
@@ -358,7 +633,8 @@
     const errorStep1 = document.getElementById('error-step-1');
 
     fileInput.addEventListener('change', () => handleFileSelect(fileInput.files[0]));
-    fileArea.addEventListener('dragover', (e) => { e.preventDefault(); });
+    fileArea.addEventListener('dragover', (e) => { e.preventDefault(); fileArea.style.borderColor = 'var(--c-blue-dark)'; });
+    fileArea.addEventListener('dragleave', () => { fileArea.style.borderColor = 'rgba(0,19,91,0.25)'; });
     fileArea.addEventListener('drop', (e) => {
       e.preventDefault();
       handleFileSelect(e.dataTransfer.files[0]);
@@ -380,7 +656,6 @@
       btnParseCv.style.display = 'none';
 
       try {
-        // Extraer texto del PDF con PDF.js
         const arrayBuffer = await file.arrayBuffer();
         const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
@@ -394,13 +669,11 @@
         }
         cvTextoExtraido = pages.join('\n\n');
 
-        // Subir PDF a Supabase Storage en segundo plano
         uploadCvToSupabase(file);
 
-        // Llamar a /api/parse-cv
         const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
           ? '/api/parse-cv'
-          : 'https://alumni-chat.juandiegosotagui.workers.dev/';
+          : 'https://alumni-chat.unisabana-alumni.workers.dev/';
 
         const res = await fetch(targetUrl, {
           method: 'POST',
@@ -416,7 +689,7 @@
           throw new Error(data.error || 'No se pudo estructurar el CV.');
         }
       } catch (err) {
-        showErrorStep1('Ocurrió un aviso: ' + err.message + '. Puedes continuar y diligenciar manualmente.');
+        showErrorStep1('Aviso: ' + err.message + '. Puedes continuar y revisar los datos manualmente.');
         btnParseCv.style.display = 'inline-flex';
       } finally {
         parseLoading.style.display = 'none';
@@ -441,13 +714,13 @@
     function processUploadedCV() {
       document.getElementById('sec-step-1').style.display = 'none';
       document.getElementById('sec-step-2').style.display = 'block';
-      document.getElementById('pill-step-1').className = 'step-pill completed';
-      document.getElementById('pill-step-2').className = 'step-pill active';
-      document.getElementById('pill-step-3').className = 'step-pill active';
+      document.getElementById('pill-step-1').className = 'wizard-step completed';
+      document.getElementById('pill-step-2').className = 'wizard-step active';
+      document.getElementById('pill-step-3').className = 'wizard-step active';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /* ── PASO 2: FORMULARIO DINÁMICO DE EXPERIENCIA Y FORMACIÓN ──── */
+    /* ── PASO 2: FORMULARIO DINÁMICO ────────────────────────────── */
     function populateStep2Form(extracted) {
       if (extracted.nombre) document.getElementById('f-nombre').value = extracted.nombre;
       if (extracted.email) document.getElementById('f-email').value = extracted.email;
@@ -467,10 +740,14 @@
     function addExperienciaBlock(data = {}) {
       const container = document.getElementById('experiencias-container');
       const box = document.createElement('div');
-      box.className = 'dynamic-item-box exp-item';
+      box.className = 'dynamic-item-card exp-item';
       box.innerHTML = `
-        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕ Eliminar</button>
-        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span>Eliminar</span>
+        </button>
+        
+        <div class="form-grid-2">
           <div class="field">
             <label>Cargo / Rol</label>
             <input type="text" class="exp-cargo" value="${data.cargo || ''}" required placeholder="Ej: Coordinador de Proyectos">
@@ -480,7 +757,8 @@
             <input type="text" class="exp-empresa" value="${data.empresa || ''}" required placeholder="Ej: Gobernación de Cundinamarca">
           </div>
         </div>
-        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+        
+        <div class="form-grid-2">
           <div class="field">
             <label>Fecha Inicio</label>
             <input type="text" class="exp-inicio" value="${data.fecha_inicio || ''}" placeholder="Ej: 2021 o Ene 2021">
@@ -490,18 +768,21 @@
             <input type="text" class="exp-fin" value="${data.fecha_fin || ''}" placeholder="Ej: 2024 o Actualidad">
           </div>
         </div>
-        <div style="margin-bottom:0.8rem;">
-          <label style="font-size:0.85rem; cursor:pointer;">
-            <input type="checkbox" class="exp-actual" ${data.actualmente ? 'checked' : ''}> Trabaja aquí actualmente
+
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem;">
+            <input type="checkbox" class="exp-actual" ${data.actualmente ? 'checked' : ''} style="width:16px; height:16px;">
+            <span>Trabaja aquí actualmente</span>
           </label>
         </div>
-        <div class="field" style="margin-bottom:0.8rem;">
-          <label>Funciones Principales</label>
-          <textarea class="exp-funciones" style="min-height:70px;" placeholder="Resumen de responsabilidades...">${data.funciones || ''}</textarea>
-        </div>
+
         <div class="field">
+          <label>Funciones Principales</label>
+          <textarea class="exp-funciones" placeholder="Resumen de responsabilidades...">${data.funciones || ''}</textarea>
+        </div>
+        <div class="field" style="margin-bottom:0;">
           <label>Logros Destacados</label>
-          <textarea class="exp-logros" style="min-height:70px;" placeholder="Principales resultados u objetivos alcanzados...">${data.logros || ''}</textarea>
+          <textarea class="exp-logros" placeholder="Principales resultados u objetivos alcanzados...">${data.logros || ''}</textarea>
         </div>
       `;
       container.appendChild(box);
@@ -510,14 +791,18 @@
     function addFormacionBlock(data = {}) {
       const container = document.getElementById('formaciones-container');
       const box = document.createElement('div');
-      box.className = 'dynamic-item-box form-item';
+      box.className = 'dynamic-item-card form-item';
 
       const tipos = ["Curso informal", "Diplomado", "Técnico", "Tecnólogo", "Pregrado", "Posgrado", "Doctorado", "Estudio post-doctoral"];
       const optionsHtml = tipos.map(t => `<option ${data.tipo === t ? 'selected' : ''}>${t}</option>`).join('');
 
       box.innerHTML = `
-        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">✕ Eliminar</button>
-        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:0.8rem;">
+        <button type="button" class="btn-remove-item" onclick="this.parentElement.remove()">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span>Eliminar</span>
+        </button>
+
+        <div class="form-grid-2">
           <div class="field">
             <label>Tipo de Formación</label>
             <select class="form-tipo" required>${optionsHtml}</select>
@@ -527,16 +812,17 @@
             <input type="text" class="form-programa" value="${data.programa || ''}" required placeholder="Ej: Ingeniería Industrial / Diplomado en IA">
           </div>
         </div>
-        <div class="form-two-col" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
-          <div class="field">
+
+        <div class="form-grid-3">
+          <div class="field" style="margin-bottom:0;">
             <label>Institución</label>
             <input type="text" class="form-institucion" value="${data.institucion || ''}" placeholder="Ej: Universidad de La Sabana">
           </div>
-          <div class="field">
+          <div class="field" style="margin-bottom:0;">
             <label>Fecha Inicio</label>
             <input type="text" class="form-inicio" value="${data.fecha_inicio || ''}" placeholder="Ej: 2018">
           </div>
-          <div class="field">
+          <div class="field" style="margin-bottom:0;">
             <label>Fecha Fin</label>
             <input type="text" class="form-fin" value="${data.fecha_fin || ''}" placeholder="Ej: 2023">
           </div>
@@ -556,7 +842,6 @@
       e.preventDefault();
       errorStep2.style.display = 'none';
 
-      // Recopilar experiencias
       const expBoxes = document.querySelectorAll('.exp-item');
       const experiencias = [];
       expBoxes.forEach(box => {
@@ -571,7 +856,6 @@
         });
       });
 
-      // Recopilar formaciones
       const formBoxes = document.querySelectorAll('.form-item');
       const formaciones = [];
       formBoxes.forEach(box => {
@@ -604,7 +888,7 @@
       try {
         const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
           ? '/api/match'
-          : 'https://alumni-chat.juandiegosotagui.workers.dev/';
+          : 'https://alumni-chat.unisabana-alumni.workers.dev/';
 
         const res = await fetch(targetUrl, {
           method: 'POST',
@@ -632,9 +916,9 @@
     function renderTop5Results(res) {
       document.getElementById('sec-step-2').style.display = 'none';
       document.getElementById('sec-step-3').style.display = 'block';
-      document.getElementById('pill-step-2').className = 'step-pill completed';
-      document.getElementById('pill-step-3').className = 'step-pill completed';
-      document.getElementById('pill-step-4').className = 'step-pill active';
+      document.getElementById('pill-step-2').className = 'wizard-step completed';
+      document.getElementById('pill-step-3').className = 'wizard-step completed';
+      document.getElementById('pill-step-4').className = 'wizard-step active';
 
       document.getElementById('r-sintesis').textContent = res.sintesis_perfil || '';
 
@@ -647,43 +931,69 @@
         const card = document.createElement('div');
         card.className = 'top5-card';
 
-        const score = item.puntaje_match || 80;
+        const score = item.puntaje_match || 85;
         const rankingNum = item.ranking || (index + 1);
-        const urlBtn = item.url ? `<a href="${item.url}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:1.25rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;">Ver programa oficial en UniSabana ↗</a>` : '';
+        const urlBtn = item.url ? `
+          <a href="${item.url}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:1.5rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;">
+            <span>Ver programa oficial en UniSabana</span>
+            <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </a>
+        ` : '';
 
         card.innerHTML = `
           <div class="top5-header">
             <div>
-              <span class="match-tag">#${rankingNum} Posgrado Recomendado</span>
-              <h3 style="font-family:var(--font-display); font-size:1.4rem; color:var(--c-blue-dark); margin-top:0.25rem;">
+              <span class="rank-badge">
+                <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>#${rankingNum} Posgrado Recomendado</span>
+              </span>
+              <h3 style="font-family:var(--font-display); font-size:1.5rem; color:var(--c-blue-dark); margin-top:0.4rem; line-height:1.25;">
                 ${item.nombre_programa || 'Programa de Posgrado'}
               </h3>
-              <p style="font-size:0.88rem; color:var(--text-muted); margin-top:0.2rem;">
-                🏛️ ${item.facultad || 'Universidad de La Sabana'} &middot; 📍 ${item.modalidad || 'Presencial / Híbrida'}
-              </p>
+              <div style="font-size:0.88rem; color:var(--text-muted); margin-top:0.4rem; display:flex; gap:1.25rem; flex-wrap:wrap;">
+                <span style="display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg class="icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 11h12M6 15h12M6 7l6-4 6 4"/></svg>
+                  ${item.facultad || 'Universidad de La Sabana'}
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:0.35rem;">
+                  <svg class="icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  ${item.modalidad || 'Presencial / Híbrida'}
+                </span>
+              </div>
             </div>
-            <div class="score-badge">
-              <span>🎯 Match ${score}/100</span>
+            
+            <div class="score-chip">
+              <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Match ${score}/100</span>
             </div>
           </div>
 
-          <div class="score-bar-bg">
-            <div class="score-bar-fill" style="width: ${score}%;"></div>
+          <div class="score-progress-bg">
+            <div class="score-progress-fill" style="width: ${score}%;"></div>
           </div>
 
-          <div style="margin-bottom:1rem;">
-            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">🎯 Justificación del Match</div>
-            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.justificacion || ''}</p>
+          <div class="section-detail-box">
+            <div class="section-detail-title">
+              <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <span>Justificación del Match</span>
+            </div>
+            <p class="section-detail-text">${item.justificacion || ''}</p>
           </div>
 
-          <div style="margin-bottom:1rem;">
-            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">🚀 Impacto a 5 Años en tu Carrera y Desarrollo Personal</div>
-            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.impacto_laboral_y_personal || ''}</p>
+          <div class="section-detail-box">
+            <div class="section-detail-title">
+              <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              <span>Impacto a 5 Años en tu Carrera y Desarrollo Personal</span>
+            </div>
+            <p class="section-detail-text">${item.impacto_laboral_y_personal || ''}</p>
           </div>
 
-          <div style="margin-bottom:1rem;">
-            <div style="font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--c-blue-dark); margin-bottom:0.3rem;">💡 Competencias Clave a Potenciar</div>
-            <p style="font-size:0.92rem; color:var(--text-secondary); line-height:1.6;">${item.competencias_clave || ''}</p>
+          <div class="section-detail-box">
+            <div class="section-detail-title">
+              <svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue-dark)" stroke-width="2.2"><path d="M12 2v8"/><path d="m4.93 10.93 4.24 4.24"/><path d="M2 18h8"/><path d="m20 18-5.66-5.66"/><path d="M22 22 15 15"/></svg>
+              <span>Competencias Clave a Potenciar</span>
+            </div>
+            <p class="section-detail-text">${item.competencias_clave || ''}</p>
           </div>
 
           ${urlBtn}
