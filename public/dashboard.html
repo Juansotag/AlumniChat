@@ -354,8 +354,14 @@ function renderTable(rows){
       +'<td style="text-align:center"><button class="btn-del" title="Eliminar candidato" onclick="event.stopPropagation(); deleteRow(\''+r.id+'\')">&#x1F5D1;</button></td>';
     tr.addEventListener('click',function(){ openModal(r); });
     tbody.appendChild(tr);
-    if(r.cv_path){ var url=SUPABASE_URL+'/storage/v1/object/public/'+BUCKET+'/'+r.cv_path; var cell=document.getElementById('cv-'+r.id); if(cell) cell.innerHTML='<a class="cv-link" href="'+url+'" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>'; }
+    if(r.cv_path){ var url=getCvUrl(r.cv_path); var cell=document.getElementById('cv-'+r.id); if(cell) cell.innerHTML='<a class="cv-link" href="'+url+'" target="_blank" onclick="event.stopPropagation()">Ver PDF</a>'; }
   });
+}
+
+function getCvUrl(path){
+  if(!path) return '#';
+  var clean = String(path).replace(/^hojas-de-vida\//i, '');
+  return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + clean;
 }
 
 // MODAL
@@ -369,7 +375,7 @@ function openModal(r){
   sv('m-mot',r.motivacion); sv('m-con',r.conexion); sv('m-comp',r.competencias);
   sv('m-lin',r.lineas); sv('m-proy',r.proyeccion); sv('m-frase',r.frase_potente);
   var cvEl=document.getElementById('m-cv');
-  if(r.cv_path){ var url=SUPABASE_URL+'/storage/v1/object/public/'+BUCKET+'/'+r.cv_path; cvEl.innerHTML='<a class="cv-link" href="'+url+'" target="_blank">Descargar PDF</a>'; }
+  if(r.cv_path){ var url=getCvUrl(r.cv_path); cvEl.innerHTML='<a class="cv-link" href="'+url+'" target="_blank">Descargar PDF</a>'; }
   else { cvEl.textContent='No adjunto CV'; }
   document.getElementById('modal-overlay').classList.add('open');
 }
