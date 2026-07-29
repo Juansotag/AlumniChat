@@ -1648,3 +1648,18 @@ button {
   color: #ffffff;
   transform: translateY(-2px);
 }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-inline {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgba(0, 19, 91, 0.18);
+  border-top-color: var(--c-blue-dark);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite !important;
+}
