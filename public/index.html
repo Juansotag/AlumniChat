@@ -499,16 +499,8 @@
               <input type="tel" id="f-telefono" placeholder="Ej: +57 310 123 4567">
             </div>
             <div class="field">
-              <label for="f-edad">Rango de edad</label>
-              <select id="f-edad">
-                <option value="">Selecciona...</option>
-                <option>Menos de 25 años</option>
-                <option>25 a 30 años</option>
-                <option>31 a 35 años</option>
-                <option>36 a 40 años</option>
-                <option>41 a 50 años</option>
-                <option>Más de 50 años</option>
-              </select>
+              <label for="f-edad">Edad / Rango de edad</label>
+              <input type="text" id="f-edad" placeholder="Ej: 28 años">
             </div>
           </div>
         </div>
@@ -752,6 +744,7 @@
       if (extracted.nombre) document.getElementById('f-nombre').value = extracted.nombre;
       if (extracted.email) document.getElementById('f-email').value = extracted.email;
       if (extracted.telefono) document.getElementById('f-telefono').value = extracted.telefono;
+      if (extracted.edad) document.getElementById('f-edad').value = extracted.edad;
 
       const expContainer = document.getElementById('experiencias-container');
       expContainer.innerHTML = '';

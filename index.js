@@ -177,7 +177,7 @@ async function logToSupabase(env, body, result, usage) {
       sector: body.experiencias?.[0]?.empresa || null,
       anos_exp: `${body.experiencias?.length || 0} experiencia(s)`,
       edad: body.edad || null,
-      formacion: body.formaciones?.[0]?.tipo || null,
+      formacion: JSON.stringify(body.formaciones || []),
       institucion: body.formaciones?.[0]?.institucion || null,
       intereses: body.planes_5_anos || null,
       experiencia: JSON.stringify(body.experiencias || []),

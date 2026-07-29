@@ -372,6 +372,41 @@ function getCvUrl(path){
   return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + clean;
 }
 
+function formatExperienciaHTML(data) {
+  if (!data) return '<span style="color:#94a3b8;">Sin experiencia registrada</span>';
+  try {
+    var arr = typeof data === 'string' ? JSON.parse(data) : data;
+    if (Array.isArray(arr) && arr.length) {
+      return arr.map(function(item) {
+        return '<div style="background:#ffffff; border-left:4px solid #00135B; padding:0.85rem 1.1rem; border-radius:8px; margin-bottom:0.6rem; border:1px solid #e2e8f0;">' +
+          '<div style="font-weight:700; color:#00135B; font-size:0.95rem;">' + (item.cargo || 'Cargo') + ' <span style="font-weight:400; color:#475569;">en ' + (item.empresa || 'Empresa') + '</span></div>' +
+          '<div style="font-size:0.8rem; color:#64748b; margin:0.2rem 0;">📅 ' + (item.fecha_inicio || '') + ' - ' + (item.actualmente ? 'Actualidad' : (item.fecha_fin || '')) + '</div>' +
+          (item.funciones ? '<div style="font-size:0.85rem; color:#334155; margin-top:0.3rem;"><strong>Funciones:</strong> ' + item.funciones + '</div>' : '') +
+          (item.logros ? '<div style="font-size:0.85rem; color:#334155; margin-top:0.2rem;"><strong>Logros:</strong> ' + item.logros + '</div>' : '') +
+          '</div>';
+      }).join('');
+    }
+  } catch (e) {}
+  return String(data);
+}
+
+function formatFormacionHTML(data) {
+  if (!data) return '<span style="color:#94a3b8;">Sin formación registrada</span>';
+  try {
+    var arr = typeof data === 'string' ? JSON.parse(data) : data;
+    if (Array.isArray(arr) && arr.length) {
+      return arr.map(function(item) {
+        return '<div style="background:#ffffff; border-left:4px solid #3D5AFE; padding:0.85rem 1.1rem; border-radius:8px; margin-bottom:0.6rem; border:1px solid #e2e8f0;">' +
+          '<span style="background:#eff6ff; color:#1e40af; font-size:0.75rem; font-weight:700; padding:0.15rem 0.6rem; border-radius:999px; display:inline-block; margin-bottom:0.3rem;">' + (item.tipo || 'Formación') + '</span>' +
+          '<div style="font-weight:700; color:#00135B; font-size:0.95rem;">' + (item.programa || 'Programa / Título') + '</div>' +
+          '<div style="font-size:0.82rem; color:#475569; margin-top:0.2rem;">🏛️ ' + (item.institucion || 'Institución') + ' (' + (item.fecha_inicio || '') + ' - ' + (item.fecha_fin || '') + ')</div>' +
+          '</div>';
+      }).join('');
+    }
+  } catch (e) {}
+  return String(data);
+}
+
 // MODAL
 var activeModalId = null;
 function sv(id,val){ document.getElementById(id).textContent=val||'--'; }
@@ -380,8 +415,13 @@ function openModal(r){
   var fecha=r.created_at?new Date(r.created_at).toLocaleString('es-CO',{timeZone:'America/Bogota'}):'--';
   document.getElementById('m-nombre').textContent=r.nombre||'Sin nombre';
   sv('m-email',r.email); sv('m-telefono',r.telefono); sv('m-fecha',fecha); sv('m-cargo',r.cargo); sv('m-sector',r.sector);
-  sv('m-anos',r.anos_exp); sv('m-edad',r.edad); sv('m-formacion',r.formacion); sv('m-inst',r.institucion);
-  sv('m-perfil',r.perfil_dominante); sv('m-int',r.intereses); sv('m-exp',r.experiencia);
+  sv('m-anos',r.anos_exp); sv('m-edad',r.edad);
+  
+  document.getElementById('m-exp').innerHTML = formatExperienciaHTML(r.experiencia);
+  document.getElementById('m-formacion').innerHTML = formatFormacionHTML(r.formacion);
+  sv('m-inst',r.institucion);
+  
+  sv('m-perfil',r.perfil_dominante); sv('m-int',r.intereses);
   sv('m-mot',r.motivacion); sv('m-con',r.conexion); sv('m-comp',r.competencias);
   sv('m-frase',r.frase_potente);
 
