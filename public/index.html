@@ -669,7 +669,7 @@
         }
         cvTextoExtraido = pages.join('\n\n');
 
-        uploadCvToSupabase(file);
+        await uploadCvToSupabase(file);
 
         const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
           ? '/api/parse-cv'
@@ -697,13 +697,25 @@
     }
 
     async function uploadCvToSupabase(file) {
+      if (!file) return;
       try {
-        const fileName = `CV_Alumni_${Date.now()}.pdf`;
-        const { data, error } = await sbClient.storage.from('hojas-de-vida').upload(fileName, file);
-        if (!error && data) {
+        const safeName = (file.name || 'CV').replace(/[^a-zA-Z0-9_\-.]/g, '_');
+        const fileName = `CV_Alumni_${Date.now()}_${safeName}`;
+        console.log('[Supabase Storage] Iniciando subida de:', fileName);
+        
+        const { data, error } = await sbClient.storage
+          .from('hojas-de-vida')
+          .upload(fileName, file, { contentType: 'application/pdf', upsert: true });
+
+        if (error) {
+          console.error('[Supabase Storage Upload Error]:', error.message, error);
+        } else if (data) {
           cvPathSupabase = data.path;
+          console.log('[Supabase Storage Upload Exitoso]:', data.path);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('[Supabase Storage Excepción]:', e);
+      }
     }
 
     function showErrorStep1(msg) {
