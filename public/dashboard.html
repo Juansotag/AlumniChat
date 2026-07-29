@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--blue:#00135B;--blue-lg:#e8eaf6;--accent:#3D5AFE;--bg:#f4f6fb;--card:#fff;--border:#dde1ee;--text:#1a1f36;--muted:#6b7280;--r:12px;--f:'Libre Franklin',sans-serif}
@@ -176,7 +177,7 @@ td{padding:.55rem .9rem;vertical-align:top;max-width:180px;overflow:hidden;text-
     <div class="msec"><div class="mlbl">Expectativas de Posgrado</div><div class="mval" id="m-mot">-</div></div>
     <div class="msec"><div class="mlbl">Síntesis del Perfil</div><div class="mval" id="m-con">-</div></div>
     <div class="msec"><div class="mlbl">Competencias a Desarrollar</div><div class="mval" id="m-comp">-</div></div>
-    <div class="msec"><div class="mlbl">Top 5 Posgrados (Detallado)</div><div class="mval" id="m-proy" style="white-space:pre-wrap; line-height:1.65; background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid #e2e8f0; font-family:monospace; font-size:0.85rem;">-</div></div>
+    <div class="msec"><div class="mlbl">Top 5 Posgrados (Detallado)</div><div class="mval" id="m-proy" style="line-height:1.7; background:#f8fafc; padding:1.25rem; border-radius:12px; border:1px solid #e2e8f0; font-size:0.9rem; color:#1e293b;">-</div></div>
     <div class="frase-box"><div class="mlbl">Frase Inspiracional</div><div class="mval" id="m-frase">-</div></div>
     <div class="msec" style="margin-top:1rem"><div class="mlbl">Hoja de vida (PDF)</div><div class="mval" id="m-cv">-</div></div>
   </div>
@@ -382,7 +383,17 @@ function openModal(r){
   sv('m-anos',r.anos_exp); sv('m-edad',r.edad); sv('m-formacion',r.formacion); sv('m-inst',r.institucion);
   sv('m-perfil',r.perfil_dominante); sv('m-int',r.intereses); sv('m-exp',r.experiencia);
   sv('m-mot',r.motivacion); sv('m-con',r.conexion); sv('m-comp',r.competencias);
-  sv('m-proy',r.proyeccion || r.lineas); sv('m-frase',r.frase_potente);
+  sv('m-frase',r.frase_potente);
+
+  // Renderizado Markdown de la propuesta Top 5
+  var proyText = r.proyeccion || r.lineas || '--';
+  var proyContainer = document.getElementById('m-proy');
+  if (window.marked && typeof window.marked.parse === 'function') {
+    proyContainer.innerHTML = window.marked.parse(proyText);
+  } else {
+    proyContainer.textContent = proyText;
+  }
+
   var cvEl=document.getElementById('m-cv');
   if(r.cv_path){ var url=getCvUrl(r.cv_path); cvEl.innerHTML='<a class="cv-link" href="'+url+'" target="_blank">Descargar PDF</a>'; }
   else { cvEl.textContent='No adjunto CV'; }
