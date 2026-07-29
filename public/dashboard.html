@@ -259,40 +259,93 @@ function buildUsage(rows){
 
 // FILTERS
 function populateFilters(rows){
-  var fields={'f-perfil':'perfil_dominante','f-sector':'sector','f-anos':'anos_exp','f-edad':'edad','f-formacion':'formacion'};
-  Object.keys(fields).forEach(function(id){
-    var sel=document.getElementById(id);
-    var vals=[...new Set(rows.map(function(r){ return r[fields[id]]; }).filter(Boolean))].sort();
-    vals.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
-    sel.addEventListener('input',applyFilters);
+  // 1. Población de categorías de formación
+  var selForm = document.getElementById('f-formacion');
+  selForm.innerHTML = '<option value="">Todas las categorías</option>';
+  var categoriasEducativas = ["Curso informal", "Diplomado", "Técnico", "Tecnólogo", "Pregrado", "Posgrado", "Doctorado", "Estudio post-doctoral"];
+  categoriasEducativas.forEach(function(cat){
+    var o = document.createElement('option');
+    o.value = cat; o.textContent = cat;
+    selForm.appendChild(o);
   });
-  document.getElementById('f-search').addEventListener('input',applyFilters);
-  document.getElementById('btn-reset').addEventListener('click',function(){
+  selForm.addEventListener('input', applyFilters);
+
+  // 2. Población de otros filtros (sector, años, edad)
+  var simpleFields = {'f-sector':'sector', 'f-anos':'anos_exp', 'f-edad':'edad'};
+  Object.keys(simpleFields).forEach(function(id){
+    var sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">Todos</option>';
+    var vals = [...new Set(rows.map(function(r){ return r[simpleFields[id]]; }).filter(Boolean))].sort();
+    vals.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+    sel.addEventListener('input', applyFilters);
+  });
+
+  // 3. Población del filtro de Perfil / Programa Recomendado
+  var selPerfil = document.getElementById('f-perfil');
+  selPerfil.innerHTML = '<option value="">Todos los perfiles</option>';
+  var perfilesSet = new Set();
+  rows.forEach(function(r){
+    if (r.perfil_dominante) {
+      r.perfil_dominante.split('|').forEach(function(p){
+        var clean = p.replace(/#\d+/g, '').replace(/\(\d+%\)/g, '').replace(/\(\d+ pts\)/g, '').trim();
+        if (clean) perfilesSet.add(clean);
+      });
+    }
+  });
+  [...perfilesSet].sort().forEach(function(p){
+    var o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    selPerfil.appendChild(o);
+  });
+  selPerfil.addEventListener('input', applyFilters);
+
+  document.getElementById('f-search').addEventListener('input', applyFilters);
+  document.getElementById('btn-reset').addEventListener('click', function(){
     ['f-perfil','f-sector','f-anos','f-edad','f-formacion'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('f-search').value=''; applyFilters();
   });
 }
 
 function applyFilters(){
-  var q=document.getElementById('f-search').value.toLowerCase();
-  var perfil=document.getElementById('f-perfil').value;
-  var sector=document.getElementById('f-sector').value;
-  var anos=document.getElementById('f-anos').value;
-  var edad=document.getElementById('f-edad').value;
-  var form=document.getElementById('f-formacion').value;
-  var filtered=allRows.filter(function(r){
-    if(perfil&&r.perfil_dominante!==perfil) return false;
-    if(sector&&r.sector!==sector) return false;
-    if(anos&&r.anos_exp!==anos) return false;
-    if(edad&&r.edad!==edad) return false;
-    if(form&&r.formacion!==form) return false;
-    if(q&&!['nombre','email','cargo','sector','intereses'].some(function(f){ return (r[f]||'').toLowerCase().includes(q); })) return false;
+  var q = document.getElementById('f-search').value.toLowerCase().trim();
+  var perfil = document.getElementById('f-perfil').value.toLowerCase();
+  var sector = document.getElementById('f-sector').value;
+  var anos = document.getElementById('f-anos').value;
+  var edad = document.getElementById('f-edad').value;
+  var form = document.getElementById('f-formacion').value.toLowerCase();
+
+  var filtered = allRows.filter(function(r){
+    if(sector && r.sector !== sector) return false;
+    if(anos && r.anos_exp !== anos) return false;
+    if(edad && r.edad !== edad) return false;
+
+    if(perfil && !(r.perfil_dominante || '').toLowerCase().includes(perfil) && !(r.proyeccion || '').toLowerCase().includes(perfil)) {
+      return false;
+    }
+
+    if(form) {
+      var formStr = (r.formacion || '').toLowerCase();
+      if (!formStr.includes(form)) {
+        return false;
+      }
+    }
+
+    if(q) {
+      var searchHaystack = [
+        r.nombre, r.email, r.telefono, r.cargo, r.sector,
+        r.institucion, r.intereses, r.perfil_dominante, r.proyeccion, r.formacion, r.experiencia
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      if (!searchHaystack.includes(q)) return false;
+    }
+
     return true;
   });
-  document.getElementById('total-badge').textContent=filtered.length+' candidatos';
-  document.getElementById('count-lbl').textContent=filtered.length===allRows.length
-    ? allRows.length+' registros' : filtered.length+' de '+allRows.length+' registros';
-  currentFiltered=filtered;
+
+  document.getElementById('total-badge').textContent = filtered.length + ' candidatos';
+  document.getElementById('count-lbl').textContent = filtered.length === allRows.length
+    ? allRows.length + ' registros' : filtered.length + ' de ' + allRows.length + ' registros';
+  currentFiltered = filtered;
   buildCharts(filtered); renderTable(filtered);
 }
 
@@ -313,25 +366,35 @@ function mkChart(id,rows,fn){
 }
 function cvDist(rows){ var y=rows.filter(function(r){ return r.cv_path; }).length,n=rows.length-y,t=rows.length||1; return {labels:['Con CV','Sin CV'],data:[Math.round(y/t*100),Math.round(n/t*100)]}; }
 function formacionDist(rows){
-  var counts={};
-  rows.forEach(function(r){ var v=r.formacion||'Sin dato'; counts[v]=(counts[v]||0)+1; });
-  var total=rows.length||1;
-  var order=['pregrado','especialización','maestría','doctorado'];
-  function getOrderIndex(val){
-    var v=val.toLowerCase();
-    if(v.indexOf('pregrado')!==-1||v.indexOf('licenciatura')!==-1) return 0;
-    if(v.indexOf('especialización')!==-1||v.indexOf('especializacion')!==-1) return 1;
-    if(v.indexOf('maestría')!==-1||v.indexOf('maestria')!==-1) return 2;
-    if(v.indexOf('doctorado')!==-1) return 3;
-    return 999;
-  }
-  var labels=Object.keys(counts).sort(function(a,b){
-    var idxA=getOrderIndex(a);
-    var idxB=getOrderIndex(b);
-    if(idxA!==idxB) return idxA-idxB;
-    return a.localeCompare(b);
+  var counts = {};
+  rows.forEach(function(r){
+    var formStr = r.formacion || '';
+    var categoriesFound = [];
+    var categoriasEducativas = ["Curso informal", "Diplomado", "Técnico", "Tecnólogo", "Pregrado", "Posgrado", "Doctorado", "Estudio post-doctoral"];
+    
+    try {
+      var arr = typeof formStr === 'string' ? JSON.parse(formStr) : formStr;
+      if (Array.isArray(arr) && arr.length) {
+        arr.forEach(function(item){ if(item.tipo) categoriesFound.push(item.tipo); });
+      }
+    } catch(e) {}
+
+    if (!categoriesFound.length) {
+      categoriasEducativas.forEach(function(cat){
+        if (formStr.toLowerCase().includes(cat.toLowerCase())) categoriesFound.push(cat);
+      });
+    }
+
+    if (!categoriesFound.length) categoriesFound = ['Sin especificar'];
+
+    [...new Set(categoriesFound)].forEach(function(cat){
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
   });
-  return {labels:labels,data:labels.map(function(l){ return Math.round(counts[l]/total*100); })};
+
+  var total = rows.length || 1;
+  var labels = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; });
+  return {labels: labels, data: labels.map(function(l){ return Math.round(counts[l] / total * 100); })};
 }
 function buildCharts(rows){
   mkChart('ch-perfil',rows); mkChart('ch-sector',rows); mkChart('ch-anos',rows);
