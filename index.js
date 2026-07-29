@@ -154,9 +154,20 @@ async function logToSupabase(env, body, result, usage) {
   }
   try {
     const top5 = Array.isArray(result.top_5) ? result.top_5 : [];
-    const progsStr = top5.map(r => `#${r.ranking} ${r.nombre_programa} (${r.puntaje_match} pts)`).join("\n");
+    
+    // Formato detallado completo de los 5 programas recomendados
+    const fullTop5Formatted = top5.map(r => 
+      `RANKING #${r.ranking} (${r.puntaje_match}/100 pts)\n` +
+      `• Programa: ${r.nombre_programa}\n` +
+      `• Facultad: ${r.facultad} | Modalidad: ${r.modalidad}\n` +
+      `• Justificación Match: ${r.justificacion}\n` +
+      `• Impacto a 5 Años: ${r.impacto_laboral_y_personal}\n` +
+      `• Competencias: ${r.competencias_clave}\n` +
+      `• Enlace: ${r.url || ''}`
+    ).join("\n\n----------------------------------------\n\n");
+
+    const progsSummary = top5.map(r => `#${r.ranking} ${r.nombre_programa} (${r.puntaje_match} pts)`).join(" | ");
     const compsStr = top5.map(r => `${r.nombre_programa}: ${r.competencias_clave}`).join("\n\n");
-    const proyStr = top5.map(r => `${r.nombre_programa}: ${r.impacto_laboral_y_personal}`).join("\n\n");
 
     const row = {
       nombre: body.nombre || null,
@@ -172,11 +183,11 @@ async function logToSupabase(env, body, result, usage) {
       experiencia: JSON.stringify(body.experiencias || []),
       motivacion: body.expectativas_posgrado || null,
       cv_path: body.cvPath || null,
-      perfil_dominante: top5.map(r => `${r.nombre_programa} (${r.puntaje_match}%)`).join(" | ") || result.sintesis_perfil || null,
+      perfil_dominante: progsSummary || result.sintesis_perfil || null,
       conexion: result.sintesis_perfil || null,
       competencias: compsStr || null,
-      lineas: progsStr || null,
-      proyeccion: proyStr || null,
+      lineas: JSON.stringify(top5), // Guarda el array JSON completo de los 5 posgrados
+      proyeccion: fullTop5Formatted || null, // Texto plano detallado de los 5 posgrados
       frase_potente: result.frase_inspiracional || null,
       input_tokens: usage?.input_tokens || null,
       output_tokens: usage?.output_tokens || null,
