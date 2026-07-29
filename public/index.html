@@ -833,19 +833,24 @@
           </div>
         </div>
 
-        <div class="form-grid-3">
-          <div class="field" style="margin-bottom:0;">
+        <div class="form-grid-3" style="margin-bottom:1rem;">
+          <div class="field">
             <label>Institución</label>
             <input type="text" class="form-institucion" value="${data.institucion || ''}" placeholder="Ej: Universidad de La Sabana">
           </div>
-          <div class="field" style="margin-bottom:0;">
+          <div class="field">
             <label>Fecha Inicio</label>
             <input type="text" class="form-inicio" value="${data.fecha_inicio || ''}" placeholder="Ej: 2018">
           </div>
-          <div class="field" style="margin-bottom:0;">
+          <div class="field">
             <label>Fecha Fin</label>
             <input type="text" class="form-fin" value="${data.fecha_fin || ''}" placeholder="Ej: 2023">
           </div>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label>Logros / Menciones / Tesis</label>
+          <textarea class="form-logros" placeholder="Logros académicos, reconocimientos o temas destacados...">${data.logros || ''}</textarea>
         </div>
       `;
       container.appendChild(box);
@@ -876,7 +881,7 @@
         });
       });
 
-      const formBoxes = document.querySelectorAll('.form-item');
+      const formBoxes = document.getElementById('experiencias-container') ? document.querySelectorAll('.form-item') : [];
       const formaciones = [];
       formBoxes.forEach(box => {
         formaciones.push({
@@ -885,6 +890,7 @@
           institucion: box.querySelector('.form-institucion').value.trim(),
           fecha_inicio: box.querySelector('.form-inicio').value.trim(),
           fecha_fin: box.querySelector('.form-fin').value.trim(),
+          logros: box.querySelector('.form-logros') ? box.querySelector('.form-logros').value.trim() : '',
         });
       });
 

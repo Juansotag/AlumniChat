@@ -22,13 +22,15 @@ REGLAS DE EXTRACCIÓN:
    - "Posgrado"
    - "Doctorado"
    - "Estudio post-doctoral"
-3. Para cada experiencia laboral, indica la fecha de inicio, fecha de fin (o "Actualidad"), si trabaja allí actualmente (true/false), funciones principales y logros destacados.
+3. Para cada experiencia laboral, indica fecha de inicio, fecha de fin (o "Actualidad"), si trabaja allí actualmente (true/false), funciones principales y logros destacados.
+4. Para cada formación académica, extrae tipo, programa, institución, fecha de inicio, fecha de fin y sus logros o menciones obtenidas.
 
 FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdown:
 {
   "nombre": "Nombre completo",
   "email": "correo@ejemplo.com",
   "telefono": "+57 300 000 0000",
+  "edad": "Edad o rango de edad si figura en la Hoja de Vida (ej: 28 años)",
   "experiencias": [
     {
       "cargo": "Nombre del cargo",
@@ -46,7 +48,8 @@ FORMATO DE RESPUESTA — responde ÚNICAMENTE con este JSON válido, sin markdow
       "programa": "Nombre del título o carrera",
       "institucion": "Nombre de la universidad o institución",
       "fecha_inicio": "Año o Mes/Año",
-      "fecha_fin": "Año o Mes/Año"
+      "fecha_fin": "Año o Mes/Año",
+      "logros": "Logros, menciones de honor, tesis o reconocimientos obtenidos"
     }
   ]
 }`;

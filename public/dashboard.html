@@ -68,7 +68,7 @@ td{padding:.55rem .9rem;vertical-align:top;max-width:180px;overflow:hidden;text-
 .modal-hdr{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
 .modal-hdr h2{font-size:1.1rem;flex:1}
 .mcls{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem}
+.mgrid{display:grid;grid-template-columns:1fr;gap:.85rem;margin-bottom:1rem}
 .msec{margin-bottom:1rem}
 .mlbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-bottom:.25rem}
 .mval{font-size:.88rem;line-height:1.6}
@@ -378,11 +378,17 @@ function formatExperienciaHTML(data) {
     var arr = typeof data === 'string' ? JSON.parse(data) : data;
     if (Array.isArray(arr) && arr.length) {
       return arr.map(function(item) {
-        return '<div style="background:#ffffff; border-left:4px solid #00135B; padding:0.85rem 1.1rem; border-radius:8px; margin-bottom:0.6rem; border:1px solid #e2e8f0;">' +
-          '<div style="font-weight:700; color:#00135B; font-size:0.95rem;">' + (item.cargo || 'Cargo') + ' <span style="font-weight:400; color:#475569;">en ' + (item.empresa || 'Empresa') + '</span></div>' +
-          '<div style="font-size:0.8rem; color:#64748b; margin:0.2rem 0;">📅 ' + (item.fecha_inicio || '') + ' - ' + (item.actualmente ? 'Actualidad' : (item.fecha_fin || '')) + '</div>' +
-          (item.funciones ? '<div style="font-size:0.85rem; color:#334155; margin-top:0.3rem;"><strong>Funciones:</strong> ' + item.funciones + '</div>' : '') +
-          (item.logros ? '<div style="font-size:0.85rem; color:#334155; margin-top:0.2rem;"><strong>Logros:</strong> ' + item.logros + '</div>' : '') +
+        var fechas = (item.fecha_inicio || '') + ' - ' + (item.actualmente ? 'Actualidad' : (item.fecha_fin || ''));
+        return '<div style="background:#ffffff; border-left:4px solid #00135B; padding:0.9rem 1.15rem; border-radius:10px; margin-bottom:0.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.03);">' +
+          '<div style="font-weight:700; color:#00135B; font-size:0.98rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">' +
+            '<span>' + (item.cargo || 'Cargo') + ' <span style="font-weight:400; color:#475569;">en ' + (item.empresa || 'Empresa') + '</span></span>' +
+            '<span style="font-size:0.78rem; font-weight:600; color:#64748b; background:#f1f5f9; padding:0.2rem 0.6rem; border-radius:999px; display:inline-flex; align-items:center; gap:0.3rem;">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+              fechas +
+            '</span>' +
+          '</div>' +
+          (item.funciones ? '<div style="font-size:0.86rem; color:#334155; margin-top:0.4rem; line-height:1.5;"><strong>Funciones:</strong> ' + item.funciones + '</div>' : '') +
+          (item.logros ? '<div style="font-size:0.86rem; color:#334155; margin-top:0.3rem; line-height:1.5;"><strong>Logros:</strong> ' + item.logros + '</div>' : '') +
           '</div>';
       }).join('');
     }
@@ -396,10 +402,25 @@ function formatFormacionHTML(data) {
     var arr = typeof data === 'string' ? JSON.parse(data) : data;
     if (Array.isArray(arr) && arr.length) {
       return arr.map(function(item) {
-        return '<div style="background:#ffffff; border-left:4px solid #3D5AFE; padding:0.85rem 1.1rem; border-radius:8px; margin-bottom:0.6rem; border:1px solid #e2e8f0;">' +
-          '<span style="background:#eff6ff; color:#1e40af; font-size:0.75rem; font-weight:700; padding:0.15rem 0.6rem; border-radius:999px; display:inline-block; margin-bottom:0.3rem;">' + (item.tipo || 'Formación') + '</span>' +
-          '<div style="font-weight:700; color:#00135B; font-size:0.95rem;">' + (item.programa || 'Programa / Título') + '</div>' +
-          '<div style="font-size:0.82rem; color:#475569; margin-top:0.2rem;">🏛️ ' + (item.institucion || 'Institución') + ' (' + (item.fecha_inicio || '') + ' - ' + (item.fecha_fin || '') + ')</div>' +
+        var fechas = (item.fecha_inicio || '') + (item.fecha_fin ? ' - ' + item.fecha_fin : '');
+        var fechaBadge = fechas ? '<span style="font-size:0.78rem; font-weight:600; color:#64748b; background:#f1f5f9; padding:0.2rem 0.6rem; border-radius:999px; display:inline-flex; align-items:center; gap:0.3rem;">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          fechas + '</span>' : '';
+
+        return '<div style="background:#ffffff; border-left:4px solid #3D5AFE; padding:0.9rem 1.15rem; border-radius:10px; margin-bottom:0.75rem; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.03);">' +
+          '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.35rem;">' +
+            '<span style="background:#eff6ff; color:#1e40af; font-size:0.75rem; font-weight:700; padding:0.2rem 0.65rem; border-radius:999px; display:inline-flex; align-items:center; gap:0.3rem;">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>' +
+              (item.tipo || 'Formación') +
+            '</span>' +
+            fechaBadge +
+          '</div>' +
+          '<div style="font-weight:700; color:#00135B; font-size:0.98rem;">' + (item.programa || 'Programa / Título') + '</div>' +
+          '<div style="font-size:0.85rem; color:#475569; margin-top:0.25rem; display:flex; align-items:center; gap:0.35rem;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 11h12M6 15h12M6 7l6-4 6 4"/></svg>' +
+            (item.institucion || 'Institución') +
+          '</div>' +
+          (item.logros ? '<div style="font-size:0.85rem; color:#334155; margin-top:0.4rem; line-height:1.5;"><strong>Logros / Menciones:</strong> ' + item.logros + '</div>' : '') +
           '</div>';
       }).join('');
     }
