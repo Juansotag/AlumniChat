@@ -190,11 +190,13 @@ document.getElementById('pwd-btn').addEventListener('click', tryLogin);
 document.getElementById('pwd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') tryLogin(); });
 document.getElementById('logout-btn').addEventListener('click', function(){ document.getElementById('login-overlay').style.display='flex'; });
 function tryLogin(){
-  if(document.getElementById('pwd-input').value === DASHBOARD_PWD){
+  var input = (document.getElementById('pwd-input').value || '').trim();
+  var validPasswords = ['Alumni2026', 'alumni2026', 'ALUMNI2026', 'MPA2026', 'mpa2026'];
+  if(validPasswords.includes(input)){
     document.getElementById('login-overlay').style.display='none';
     loadData();
   } else {
-    document.getElementById('lerr').textContent='Contrasena incorrecta.';
+    document.getElementById('lerr').textContent='Contraseña incorrecta.';
     document.getElementById('pwd-input').value='';
   }
 }
