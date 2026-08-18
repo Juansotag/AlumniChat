@@ -257,7 +257,7 @@ export default {
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: "claude-3-5-haiku-20241022",
           max_tokens: 2500,
           system: PARSE_CV_SYSTEM_PROMPT,
           messages: [
@@ -314,7 +314,7 @@ ${body.expectativas_posgrado || "No especificadas"}
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "claude-3-5-haiku-20241022",
         max_tokens: 3500,
         system: MATCH_TOP5_SYSTEM_PROMPT,
         messages: [

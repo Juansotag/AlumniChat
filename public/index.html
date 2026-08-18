@@ -678,9 +678,7 @@
 
         await uploadCvToSupabase(file);
 
-        const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? '/api/parse-cv'
-          : 'https://alumni-chat.unisabana-alumni.workers.dev/';
+        const targetUrl = '/api/parse-cv';
 
         const res = await fetch(targetUrl, {
           method: 'POST',
@@ -912,9 +910,7 @@
       btnMatchText.textContent = 'Analizando Top 5 con Inteligencia Artificial...';
 
       try {
-        const targetUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? '/api/match'
-          : 'https://alumni-chat.unisabana-alumni.workers.dev/';
+        const targetUrl = '/api/match';
 
         const res = await fetch(targetUrl, {
           method: 'POST',
